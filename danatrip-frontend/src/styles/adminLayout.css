@@ -1,0 +1,121 @@
+.admin-layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* ===== Sidebar ===== */
+.admin-sidebar {
+  width: 260px;
+  background: #1a1a2e;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  z-index: 100;
+  overflow-y: auto;
+}
+
+.sidebar-header {
+  padding: 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-header h2 {
+  font-size: 1.3rem;
+  margin-bottom: 2px;
+}
+
+.sidebar-header span {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.sidebar-nav {
+  flex: 1;
+  padding: 1rem 0;
+}
+
+.sidebar-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 1.5rem;
+  color: rgba(255, 255, 255, 0.7);
+  text-decoration: none;
+  transition: all 0.2s;
+  border: none;
+  background: none;
+  width: 100%;
+  font-size: 0.95rem;
+  cursor: pointer;
+  text-align: left;
+}
+
+.sidebar-link:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: white;
+}
+
+.sidebar-link.active {
+  background: rgba(0, 119, 204, 0.3);
+  color: #00b4d8;
+  border-left: 3px solid #00b4d8;
+}
+
+.sidebar-footer {
+  padding: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0.8rem 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.sidebar-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #0077cc, #00b4d8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+.sidebar-username {
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.sidebar-role {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.5);
+  margin: 0;
+}
+
+.back-link { color: rgba(255, 255, 255, 0.5); }
+.logout-btn { color: #e74c3c; }
+
+/* ===== Main Content ===== */
+.admin-main {
+  margin-left: 260px;
+  flex: 1;
+  background: #f0f2f5;
+  min-height: 100vh;
+  padding: 2rem;
+}
+
+@media (max-width: 768px) {
+  .admin-sidebar { width: 60px; }
+  .admin-sidebar span { display: none; }
+  .sidebar-header h2 { font-size: 1rem; }
+  .admin-main { margin-left: 60px; }
+}

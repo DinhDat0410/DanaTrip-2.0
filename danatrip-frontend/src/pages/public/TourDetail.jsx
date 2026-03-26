@@ -4,6 +4,7 @@ import API from '../../api/axios';
 import Loading from '../../components/common/Loading';
 import { useAuth } from '../../hooks/useAuth';
 import { FaCheck, FaTimes } from 'react-icons/fa';
+import '../../styles/detail.css';
 
 const TourDetail = () => {
   const { id } = useParams();

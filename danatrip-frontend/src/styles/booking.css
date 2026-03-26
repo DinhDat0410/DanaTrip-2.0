@@ -1,0 +1,136 @@
+.booking-layout {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 2rem;
+  margin-top: 1.5rem;
+}
+
+.booking-form {
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.booking-form select {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 1rem;
+  background: white;
+}
+
+.summary-card {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  position: sticky;
+  top: 90px;
+}
+
+.summary-card h2 {
+  font-size: 1.2rem;
+  margin-bottom: 0.5rem;
+}
+
+.summary-location {
+  color: #666;
+  margin-bottom: 1rem;
+}
+
+.price-breakdown {
+  margin-top: 1rem;
+}
+
+.price-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem 0;
+}
+
+.price-row.total {
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+.total-price {
+  color: #e74c3c;
+  font-weight: bold;
+  font-size: 1.3rem;
+}
+
+/* Booking Success */
+.booking-success {
+  text-align: center;
+  padding: 3rem 1rem;
+}
+
+.success-icon {
+  font-size: 4rem;
+  color: #27ae60;
+  margin-bottom: 1rem;
+}
+
+.success-details {
+  max-width: 500px;
+  margin: 2rem auto;
+  text-align: left;
+  background: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+}
+
+.success-details table {
+  width: 100%;
+}
+
+.success-details td {
+  padding: 0.5rem 0;
+}
+
+.success-details td:first-child {
+  color: #888;
+  width: 120px;
+}
+
+.success-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 2rem;
+}
+
+.btn-secondary {
+  padding: 0.75rem 1.5rem;
+  border: 1px solid #0077cc;
+  color: #0077cc;
+  background: white;
+  border-radius: 8px;
+  text-decoration: none;
+  font-size: 1rem;
+}
+
+.status-badge {
+  padding: 0.3rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.status-badge.pending { background: #fff3cd; color: #856404; }
+.status-badge.confirmed { background: #d1ecf1; color: #0c5460; }
+.status-badge.paid { background: #d4edda; color: #155724; }
+.status-badge.cancelled { background: #f8d7da; color: #721c24; }
+
+@media (max-width: 768px) {
+  .booking-layout { grid-template-columns: 1fr; }
+}

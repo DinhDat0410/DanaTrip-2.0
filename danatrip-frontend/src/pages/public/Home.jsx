@@ -35,18 +35,34 @@ const Home = () => {
 
   return (
     <div className="home">
-      {/* Hero Section */}
+      {/* Hero */}
       <section className="hero">
         <div className="hero-content">
           <h1>Khám phá Đà Nẵng</h1>
-          <p>Thành phố đáng sống nhất Việt Nam</p>
+          <p>Thành phố đáng sống nhất Việt Nam — Biển xanh, cát trắng, nắng vàng</p>
           <Link to="/tours" className="btn-primary">
-            Khám phá ngay
+            🗺️ Khám phá ngay
           </Link>
         </div>
       </section>
 
-      {/* Địa điểm nổi bật */}
+      {/* Stats Bar */}
+      <div className="stats-bar">
+        <div className="stat-item">
+          <h3>{places.length}+</h3>
+          <p>Địa điểm</p>
+        </div>
+        <div className="stat-item">
+          <h3>{tours.length}+</h3>
+          <p>Tour du lịch</p>
+        </div>
+        <div className="stat-item">
+          <h3>{foods.length}+</h3>
+          <p>Món đặc sản</p>
+        </div>
+      </div>
+
+      {/* Địa điểm */}
       <section className="section">
         <div className="section-header">
           <h2>📍 Địa điểm nổi bật</h2>
@@ -65,7 +81,7 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Tour nổi bật */}
+      {/* Tour */}
       <section className="section">
         <div className="section-header">
           <h2>🗺️ Tour du lịch</h2>

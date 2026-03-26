@@ -1,0 +1,201 @@
+/* ===== Shared Detail Styles ===== */
+.detail-page {
+  animation: fadeIn 0.5s ease-out;
+}
+
+.detail-hero-image {
+  width: 100%;
+  height: 400px;
+  object-fit: cover;
+  border-radius: var(--radius-lg);
+  margin-bottom: 2rem;
+  box-shadow: var(--shadow-md);
+}
+
+.detail-page h1 {
+  font-family: var(--font-heading);
+  font-size: 2.2rem;
+  color: var(--dark);
+  margin-bottom: 0.5rem;
+}
+
+.location {
+  color: var(--text-light);
+  font-size: 1rem;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.detail-page section {
+  margin: 2.5rem 0;
+  animation: fadeInUp 0.5s ease-out;
+}
+
+.detail-page section h2 {
+  font-family: var(--font-heading);
+  font-size: 1.4rem;
+  margin-bottom: 1rem;
+  color: var(--dark);
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid var(--border);
+}
+
+.info-card {
+  background: var(--bg-white);
+  padding: 1.2rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  transition: var(--transition);
+}
+
+.info-card:hover {
+  box-shadow: var(--shadow-sm);
+  border-color: var(--primary-light);
+}
+
+.info-card h3 {
+  color: var(--primary);
+  margin-bottom: 0.4rem;
+  font-size: 1rem;
+}
+
+/* ===== Tour Detail ===== */
+.tour-info-grid {
+  display: grid;
+  grid-template-columns: 1fr 350px;
+  gap: 2rem;
+  margin: 2rem 0;
+}
+
+.tour-price {
+  background: var(--bg-white);
+  padding: 1.5rem;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  position: sticky;
+  top: 90px;
+  border: 1px solid var(--border);
+}
+
+.tour-price h3 {
+  font-family: var(--font-heading);
+  margin-bottom: 1rem;
+}
+
+.tour-price .price {
+  color: var(--danger);
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+.highlight-list {
+  list-style: none;
+  padding: 0;
+}
+
+.highlight-list li {
+  padding: 0.6rem 0;
+  padding-left: 1.5rem;
+  position: relative;
+  color: var(--text);
+}
+
+.highlight-list li::before {
+  content: '✨';
+  position: absolute;
+  left: 0;
+}
+
+/* Schedule */
+.schedule {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.schedule-item {
+  display: flex;
+  gap: 1.2rem;
+  padding: 1.2rem 0;
+  border-left: 3px solid var(--primary-light);
+  padding-left: 1.5rem;
+  position: relative;
+}
+
+.schedule-item::before {
+  content: '';
+  position: absolute;
+  left: -8px;
+  top: 1.5rem;
+  width: 13px;
+  height: 13px;
+  background: var(--primary);
+  border-radius: 50%;
+  border: 3px solid var(--bg);
+}
+
+.schedule-step {
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  color: white;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+}
+
+.schedule-item h4 {
+  color: var(--dark);
+  margin-bottom: 0.3rem;
+}
+
+/* Includes */
+.includes-section {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+}
+
+.includes-section ul {
+  list-style: none;
+  padding: 0;
+}
+
+.includes-section li {
+  padding: 0.5rem 0;
+  padding-left: 1.5rem;
+  position: relative;
+}
+
+/* Reviews */
+.review-card {
+  background: var(--bg-white);
+  padding: 1.2rem;
+  border-radius: var(--radius-md);
+  margin-bottom: 1rem;
+  border: 1px solid var(--border);
+  transition: var(--transition);
+}
+
+.review-card:hover {
+  box-shadow: var(--shadow-sm);
+}
+
+.review-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+@media (max-width: 768px) {
+  .detail-hero-image { height: 250px; }
+  .tour-info-grid { grid-template-columns: 1fr; }
+  .includes-section { grid-template-columns: 1fr; }
+}
