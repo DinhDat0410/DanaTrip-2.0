@@ -4,6 +4,7 @@ import API from '../../api/axios';
 import Loading from '../../components/common/Loading';
 import { useAuth } from '../../hooks/useAuth';
 import { FaCheck, FaTimes, FaClock, FaCalendarAlt, FaUsers } from 'react-icons/fa';
+import { getImageUrl } from '../../utils/image';
 import '../../styles/detail.css';
 import '../../styles/tourDetail.css';
 import { getImageUrl } from '../../utils/image';

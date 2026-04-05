@@ -27,6 +27,11 @@ const Tours = () => {
     e.preventDefault();
     setLoading(true);
     setSearch(e.target.elements.search.value);
+    const value = e.target.elements.search.value;
+    if (value !== search) {
+      setLoading(true);
+      setSearch(value);
+    }
   };
 
   if (loading) return <Loading />;
