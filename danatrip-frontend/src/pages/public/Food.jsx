@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import API from '../../api/axios';
 import Card from '../../components/common/Card';
 import Loading from '../../components/common/Loading';
+import '../../styles/searchBar.css';
 
 const Foods = () => {
   const [foods, setFoods] = useState([]);

@@ -4,7 +4,13 @@ const Place = require('../models/Place');
 // @route   GET /api/places
 exports.getPlaces = async (req, res) => {
   try {
-    const places = await Place.find({ hienThi: true })
+    const query = { hienThi: true };
+
+    if (req.query.search) {
+      query.tenDiaDiem = { $regex: req.query.search, $options: 'i' };
+    }
+
+    const places = await Place.find(query)
       .select('tenDiaDiem noiDung hinhAnhChinh viTri')
       .sort('-createdAt');
 

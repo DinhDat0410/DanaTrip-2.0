@@ -7,6 +7,10 @@ exports.getTours = async (req, res) => {
     // Hỗ trợ filter theo địa điểm, tag, giá
     const query = { hienThi: true };
 
+    if (req.query.search) {
+      query.tenTour = { $regex: req.query.search, $options: 'i' };
+    }
+
     if (req.query.diaDiem) {
       query.diaDiem = req.query.diaDiem;
     }

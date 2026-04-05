@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import API from '../../api/axios';
 import Loading from '../../components/common/Loading';
+import { getImageUrl } from '../../utils/image';
 
 const PlaceDetail = () => {
   const { id } = useParams();
@@ -29,7 +30,7 @@ const PlaceDetail = () => {
     <div className="page-container">
       <div className="detail-page">
         <img
-          src={place.hinhAnhChinh || '/images/placeholder.jpg'}
+          src={getImageUrl(place.hinhAnhChinh)}
           alt={place.tenDiaDiem}
           className="detail-hero-image"
         />

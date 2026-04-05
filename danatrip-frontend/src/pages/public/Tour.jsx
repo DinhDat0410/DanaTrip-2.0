@@ -2,15 +2,18 @@ import { useState, useEffect } from 'react';
 import API from '../../api/axios';
 import Card from '../../components/common/Card';
 import Loading from '../../components/common/Loading';
+import '../../styles/searchBar.css';
 
 const Tours = () => {
   const [tours, setTours] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
 
   useEffect(() => {
     const fetchTours = async () => {
       try {
-        const res = await API.get('/tours');
+        const params = search ? `?search=${encodeURIComponent(search)}` : '';
+        const res = await API.get(`/tours${params}`);
         setTours(res.data.data || []);
       } catch (error) {
         console.error('Lỗi:', error);
@@ -19,13 +22,33 @@ const Tours = () => {
       }
     };
     fetchTours();
-  }, []);
+  }, [search]);
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    const value = e.target.elements.search.value;
+    if (value !== search) {
+      setLoading(true);
+      setSearch(value);
+    }
+  };
 
   if (loading) return <Loading />;
 
   return (
     <div className="page-container">
       <h1>🗺️ Tour du lịch Đà Nẵng</h1>
+
+      <form onSubmit={handleSearch} className="search-bar">
+        <input
+          type="text"
+          name="search"
+          placeholder="Tìm tour... (vd: Bà Nà, Hội An)"
+          className="search-input"
+        />
+        <button type="submit" className="btn-search">🔍 Tìm kiếm</button>
+      </form>
+
       <div className="card-grid">
         {tours.map((tour) => (
           <Card
