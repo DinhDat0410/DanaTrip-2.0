@@ -26,6 +26,7 @@ app.use('/api/reviews', require('./routes/review'));
 app.use('/api/contacts', require('./routes/contact'));
 app.use('/api/chat', require('./routes/chat'));
 app.use('/api/upload', require('./routes/upload'));  // MỚI
+app.use('/api/users', require('./routes/userRoutes'));
 
 // Health check
 app.get('/', (req, res) => {

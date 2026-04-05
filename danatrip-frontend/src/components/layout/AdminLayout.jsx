@@ -8,6 +8,7 @@ import {
   FaCalendarCheck,
   FaStar,
   FaEnvelope,
+  FaUsers,
   FaArrowLeft,
   FaSignOutAlt,
 } from 'react-icons/fa';
@@ -26,6 +27,7 @@ const AdminLayout = () => {
     { path: '/admin/bookings', icon: <FaCalendarCheck />, label: 'Booking' },
     { path: '/admin/reviews', icon: <FaStar />, label: 'Đánh giá' },
     { path: '/admin/contacts', icon: <FaEnvelope />, label: 'Liên hệ' },
+    { path: '/admin/users', icon: <FaUsers />, label: 'Người dùng' },
   ];
 
   const isActive = (item) => {

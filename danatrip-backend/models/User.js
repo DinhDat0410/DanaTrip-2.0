@@ -36,6 +36,15 @@ const UserSchema = new mongoose.Schema(
       enum: ['User', 'Admin'],
       default: 'User',
     },
+    trangThai: {
+      type: String,
+      enum: ['Hoạt động', 'Bị khóa'],
+      default: 'Hoạt động',
+    },
+    hienThi: {
+      type: Boolean,
+      default: true,
+    },
   },
   {
     timestamps: true,
