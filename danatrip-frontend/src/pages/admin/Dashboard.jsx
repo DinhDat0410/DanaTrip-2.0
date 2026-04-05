@@ -34,7 +34,7 @@ const Dashboard = () => {
             API.get('/bookings'),
             API.get('/reviews'),
             API.get('/contacts'),
-            API.get('/users').catch(() => ({ data: { data: [] } })),
+            API.get('/users').catch((err) => { console.error('Users API error:', err); return { data: { data: [] } }; }),
           ]);
 
         const bookings = bookingsRes.data.data || [];
@@ -82,7 +82,7 @@ const Dashboard = () => {
           const total = bookings
             .filter(
               (b) =>
-                b.trangThai !== 'Đã hủy' &&
+                b.trangThai === 'Đã thanh toán' &&
                 new Date(b.createdAt).toDateString() === dayStr
             )
             .reduce((sum, b) => sum + (b.tongTien || 0), 0);

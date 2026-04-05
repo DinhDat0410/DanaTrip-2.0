@@ -11,10 +11,12 @@ const getUsers = async (req, res) => {
     let query = {};
 
     if (search) {
+      // Escape regex special characters to prevent ReDoS
+      const escapedSearch = search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
       query = {
         $or: [
-          { hoTen: { $regex: search, $options: 'i' } },
-          { email: { $regex: search, $options: 'i' } },
+          { hoTen: { $regex: escapedSearch, $options: 'i' } },
+          { email: { $regex: escapedSearch, $options: 'i' } },
         ],
       };
     }
@@ -87,7 +89,7 @@ const updateUser = async (req, res) => {
   try {
     const { hoTen, email, matKhau, sdt, vaiTro, trangThai, hienThi } = req.body;
 
-    const user = await User.findById(req.params.id).select('+matKhau');
+    const user = await User.findById(req.params.id);
     if (!user) {
       return res.status(404).json({ success: false, message: 'Không tìm thấy người dùng' });
     }
@@ -106,7 +108,7 @@ const updateUser = async (req, res) => {
     if (trangThai !== undefined) user.trangThai = trangThai;
     if (hienThi !== undefined) user.hienThi = hienThi;
 
-    // Chỉ cập nhật mật khẩu nếu có giá trị mới
+    // Chỉ cập nhật mật khẩu nếu có giá trị mới — pre-save hook sẽ tự hash
     if (matKhau && matKhau.trim() !== '') {
       user.matKhau = matKhau;
     }

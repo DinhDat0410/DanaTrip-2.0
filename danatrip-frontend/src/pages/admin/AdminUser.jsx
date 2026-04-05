@@ -106,12 +106,12 @@ const AdminUser = () => {
               <td><strong>{user.hoTen}</strong></td>
               <td>{user.email}</td>
               <td>
-                <span className={`badge ${user.vaiTro === 'Admin' ? 'confirmed' : 'done'}`}>
+                <span className={`badge ${user.vaiTro === 'Admin' ? 'badge-admin' : 'badge-user'}`}>
                   {user.vaiTro}
                 </span>
               </td>
               <td>
-                <span className={`badge ${user.trangThai === 'Hoạt động' ? 'paid' : 'cancelled'}`}>
+                <span className={`badge ${user.trangThai === 'Hoạt động' ? 'badge-active' : 'badge-locked'}`}>
                   {user.trangThai || 'Hoạt động'}
                 </span>
               </td>

@@ -161,6 +161,12 @@
 .badge.cancelled { background: #f8d7da; color: #721c24; }
 .badge.done { background: #d4edda; color: #155724; }
 
+/* User-specific badges */
+.badge.badge-admin  { background: #e8f4fd; color: #0077cc; font-weight: 700; }
+.badge.badge-user   { background: #f0f4f8; color: #555; }
+.badge.badge-active { background: #d4edda; color: #155724; }
+.badge.badge-locked { background: #f8d7da; color: #721c24; }
+
 /* ===== Buttons ===== */
 .btn-add {
   display: flex;
