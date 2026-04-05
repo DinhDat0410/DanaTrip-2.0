@@ -2,9 +2,8 @@ import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import API from '../../api/axios';
 import Loading from '../../components/common/Loading';
-import { FaUtensils, FaListOl, FaStore, FaArrowLeft } from 'react-icons/fa';
+import { FaArrowLeft } from 'react-icons/fa';
 import '../../styles/foodDetail.css';
-import '../../styles/detail.css';
 
 const FoodDetail = () => {
   const { id } = useParams();
@@ -31,83 +30,96 @@ const FoodDetail = () => {
   return (
     <div className="page-container">
       <div className="food-detail">
-        {/* Header */}
-        <div className="food-header">
-          <img
-            src={food.hinhAnh || '/images/placeholder.jpg'}
-            alt={food.tenMon}
-            className="food-hero-image"
-          />
-          <div className="food-header-info">
-            <h1>{food.tenMon}</h1>
-            <p className="food-description">{food.moTa}</p>
-          </div>
+
+        {/* Title with ĐẶC SẢN ĐÀ NẴNG label */}
+        <div className="food-title-wrapper">
+          <h1 className="title-mon">{food.tenMon}</h1>
         </div>
 
-        {/* Album ảnh */}
+        {/* Description */}
+        {food.moTa && (
+          <p className="food-desc-main">{food.moTa}</p>
+        )}
+
+        {/* Image Grid (3 columns) */}
         {food.albumAnh?.length > 0 && (
-          <section className="food-section">
-            <h2>📸 Hình ảnh</h2>
-            <div className="food-gallery">
-              {food.albumAnh.map((img, i) => (
-                <img key={i} src={img.urlAnh} alt={`${food.tenMon} ${i + 1}`} />
-              ))}
-            </div>
-          </section>
+          <div className="image-wrapper">
+            {food.albumAnh.slice(0, 3).map((img, i) => (
+              <img key={i} className="anh-mon" src={img.urlAnh} alt={`${food.tenMon} ${i + 1}`} />
+            ))}
+          </div>
         )}
 
-        {/* Nguyên liệu */}
-        {food.nguyenLieu?.length > 0 && (
-          <section className="food-section">
-            <h2><FaUtensils /> Nguyên liệu</h2>
-            <div className="ingredient-grid">
-              {food.nguyenLieu.map((nl, i) => (
-                <div key={i} className="ingredient-item">
-                  <span className="ingredient-number">{i + 1}</span>
-                  <span>{nl.tenNguyenLieu}</span>
+        {/* 2-column layout: left content + right sidebar */}
+        <div className="amthuc-layout">
+
+          {/* Left Column */}
+          <div className="amthuc-main">
+
+            {/* Giới thiệu */}
+            {food.moTaChiTiet && (
+              <section className="food-section">
+                <h2>📖 Giới thiệu</h2>
+                <p>{food.moTaChiTiet}</p>
+              </section>
+            )}
+
+            {/* Quy trình chế biến */}
+            {food.quyTrinh?.length > 0 && (
+              <section className="food-section quytrinh">
+                <h2>👨‍🍳 Quy trình chế biến</h2>
+                <div className="cooking-steps">
+                  {food.quyTrinh
+                    .sort((a, b) => a.thuTu - b.thuTu)
+                    .map((step, i) => (
+                      <div key={i} className="cooking-step">
+                        <div className="step-number">{step.thuTu}</div>
+                        <div className="step-content">
+                          <p>{step.moTaBuoc}</p>
+                          {step.thoiGian && (
+                            <span className="step-time">⏱️ {step.thoiGian}</span>
+                          )}
+                        </div>
+                      </div>
+                    ))}
                 </div>
-              ))}
-            </div>
-          </section>
-        )}
+              </section>
+            )}
+          </div>
 
-        {/* Quy trình chế biến */}
-        {food.quyTrinh?.length > 0 && (
-          <section className="food-section">
-            <h2><FaListOl /> Quy trình chế biến</h2>
-            <div className="cooking-steps">
-              {food.quyTrinh
-                .sort((a, b) => a.thuTu - b.thuTu)
-                .map((step, i) => (
-                  <div key={i} className="cooking-step">
-                    <div className="step-number">Bước {step.thuTu}</div>
-                    <div className="step-content">
-                      <p>{step.moTaBuoc}</p>
-                      {step.thoiGian && (
-                        <span className="step-time">⏱️ {step.thoiGian}</span>
-                      )}
-                    </div>
+          {/* Right Sidebar */}
+          <aside className="amthuc-sidebar">
+
+            {/* Nguyên liệu chính */}
+            {food.nguyenLieu?.length > 0 && (
+              <div className="sidebar-box nguyenlieu-box">
+                <h3>🥄 Nguyên liệu chính</h3>
+                <ul className="nguyenlieu-list">
+                  {food.nguyenLieu.map((nl, i) => (
+                    <li key={i}>
+                      <span className="ingredient-number">{i + 1}</span>
+                      <span>{nl.tenNguyenLieu}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {/* Quán ăn nổi tiếng */}
+            {food.quanAn?.length > 0 && (
+              <div className="sidebar-box quanan">
+                <h3>🏪 Quán ăn nổi tiếng</h3>
+                {food.quanAn.map((qa, i) => (
+                  <div key={i} className="quanan-item">
+                    <h4>{qa.tenQuanAn}</h4>
+                    {qa.diaChi && <p>📍 {qa.diaChi}</p>}
+                    {qa.sdt && <p>📞 {qa.sdt}</p>}
                   </div>
                 ))}
-            </div>
-          </section>
-        )}
-
-        {/* Quán ăn gợi ý */}
-        {food.quanAn?.length > 0 && (
-          <section className="food-section">
-            <h2><FaStore /> Quán ăn gợi ý</h2>
-            <div className="restaurant-grid">
-              {food.quanAn.map((qa, i) => (
-                <div key={i} className="restaurant-card">
-                  <h3>{qa.tenQuanAn}</h3>
-                  {qa.diaChi && <p>📍 {qa.diaChi}</p>}
-                  {qa.sdt && <p>📞 {qa.sdt}</p>}
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
+              </div>
+            )}
+          </aside>
+        </div>
 
         <Link to="/foods" className="btn-back">
           <FaArrowLeft /> Quay lại danh sách

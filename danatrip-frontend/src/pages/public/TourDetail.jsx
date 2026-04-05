@@ -3,8 +3,9 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import API from '../../api/axios';
 import Loading from '../../components/common/Loading';
 import { useAuth } from '../../hooks/useAuth';
-import { FaCheck, FaTimes } from 'react-icons/fa';
+import { FaCheck, FaTimes, FaClock, FaCalendarAlt, FaUsers } from 'react-icons/fa';
 import '../../styles/detail.css';
+import '../../styles/tourDetail.css';
 
 const TourDetail = () => {
   const { id } = useParams();
@@ -43,25 +44,69 @@ const TourDetail = () => {
   if (loading) return <Loading />;
   if (!tour) return <p>Không tìm thấy tour</p>;
 
+  const coverImage = tour.hinhAnh?.[0]?.urlAnh;
+  const soChoConLai = tour.soCho - tour.soChoDaDat;
+
   return (
     <div className="page-container">
       <div className="detail-page">
+
+        {/* Cover Image */}
+        {coverImage && (
+          <img
+            src={coverImage}
+            alt={tour.tenTour}
+            className="tour-cover-image"
+          />
+        )}
+
         <h1>{tour.tenTour}</h1>
 
-        {/* Thông tin chung */}
-        <div className="tour-info-grid">
-          <div className="tour-price">
-            <h3>Giá tour</h3>
-            <p className="price">Người lớn: {tour.giaNguoiLon?.toLocaleString('vi-VN')}đ</p>
-            <p>Trẻ em: {tour.giaTreEm?.toLocaleString('vi-VN')}đ</p>
-            <p>Còn lại: {tour.soCho - tour.soChoDaDat} chỗ</p>
-            <button className="btn-primary" onClick={handleBooking}>
-              Đặt tour ngay
-            </button>
+        {/* Info Row */}
+        <div className="tour-info-row">
+          {tour.ngayKhoiHanh && (
+            <div className="tour-info-item">
+              <FaCalendarAlt className="info-icon" />
+              <div>
+                <span className="info-label">Ngày Khởi hành</span>
+                <span className="info-value">
+                  {new Date(tour.ngayKhoiHanh).toLocaleDateString('vi-VN')}
+                </span>
+              </div>
+            </div>
+          )}
+          <div className="tour-info-item">
+            <FaUsers className="info-icon" />
+            <div>
+              <span className="info-label">Chỗ còn lại</span>
+              <span className="info-value">{soChoConLai} chỗ</span>
+            </div>
           </div>
+          <div className="tour-info-item">
+            <FaClock className="info-icon" />
+            <div>
+              <span className="info-label">Trạng thái</span>
+              <span className="info-value">{tour.trangThai}</span>
+            </div>
+          </div>
+        </div>
 
+        {/* Price + Description */}
+        <div className="tour-info-grid">
           <div className="tour-description">
             <p>{tour.moTaChiTiet || tour.moTaNgan}</p>
+          </div>
+          <div className="tour-price-card">
+            <h3>Giá tour</h3>
+            <p className="tour-price-main">
+              {tour.giaNguoiLon?.toLocaleString('vi-VN')}đ
+            </p>
+            <p className="tour-price-child">
+              Trẻ em: {tour.giaTreEm?.toLocaleString('vi-VN')}đ
+            </p>
+            <button className="btn-book-tour" onClick={handleBooking}>
+              🗓️ Đặt Tour Ngay
+            </button>
           </div>
         </div>
 
@@ -69,11 +114,13 @@ const TourDetail = () => {
         {tour.highlights?.length > 0 && (
           <section>
             <h2>✨ Điểm nổi bật</h2>
-            <ul className="highlight-list">
+            <div className="highlight-grid">
               {tour.highlights.map((h, i) => (
-                <li key={i}>{h.noiDung}</li>
+                <div key={i} className="highlight-item">
+                  {h.noiDung}
+                </div>
               ))}
-            </ul>
+            </div>
           </section>
         )}
 
@@ -86,9 +133,10 @@ const TourDetail = () => {
                 .sort((a, b) => a.thuTu - b.thuTu)
                 .map((step, i) => (
                   <div key={i} className="schedule-item">
-                    <div className="schedule-step">{step.thuTu}</div>
-                    <div>
-                      <h4>{step.tieuDe}</h4>
+                    <div className="schedule-time">
+                      {step.tieuDe || `Bước ${step.thuTu}`}
+                    </div>
+                    <div className="schedule-content">
                       <p>{step.moTa}</p>
                     </div>
                   </div>
@@ -100,9 +148,9 @@ const TourDetail = () => {
         {/* Bao gồm / Không bao gồm */}
         {tour.baoGom?.length > 0 && (
           <section className="includes-section">
-            <div>
+            <div className="includes-col">
               <h3><FaCheck color="green" /> Bao gồm</h3>
-              <ul>
+              <ul className="include-list">
                 {tour.baoGom
                   .filter((b) => b.loai === 'included')
                   .map((b, i) => (
@@ -110,9 +158,9 @@ const TourDetail = () => {
                   ))}
               </ul>
             </div>
-            <div>
+            <div className="includes-col">
               <h3><FaTimes color="red" /> Không bao gồm</h3>
-              <ul>
+              <ul className="include-list">
                 {tour.baoGom
                   .filter((b) => b.loai === 'excluded')
                   .map((b, i) => (

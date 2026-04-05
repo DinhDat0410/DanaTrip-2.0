@@ -5,11 +5,27 @@ import Card from '../../components/common/Card';
 import Loading from '../../components/common/Loading';
 import '../../styles/home.css';
 
+const heroImages = [
+  '/images/danang-hero.jpg',
+  '/images/danang-hero2.jpg',
+  '/images/danang-hero3.jpg',
+];
+
 const Home = () => {
   const [places, setPlaces] = useState([]);
   const [tours, setTours] = useState([]);
   const [foods, setFoods] = useState([]);
+  const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [heroIndex, setHeroIndex] = useState(0);
+
+  // Cycle hero background images
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setHeroIndex((prev) => (prev + 1) % heroImages.length);
+    }, 4000);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -19,9 +35,17 @@ const Home = () => {
           API.get('/tours'),
           API.get('/foods'),
         ]);
-        setPlaces(placesRes.data.data?.slice(0, 3) || []);
-        setTours(toursRes.data.data?.slice(0, 3) || []);
-        setFoods(foodsRes.data.data?.slice(0, 3) || []);
+        setPlaces(placesRes.data.data?.slice(0, 4) || []);
+        setTours(toursRes.data.data?.slice(0, 4) || []);
+        setFoods(foodsRes.data.data?.slice(0, 4) || []);
+
+        // Load public reviews for home page (gracefully ignore auth errors)
+        try {
+          const reviewsRes = await API.get('/reviews');
+          setReviews(reviewsRes.data.data?.slice(0, 6) || []);
+        } catch {
+          // reviews endpoint requires admin auth — silently skip
+        }
       } catch (error) {
         console.error('Lỗi tải dữ liệu:', error);
       } finally {
@@ -35,14 +59,29 @@ const Home = () => {
 
   return (
     <div className="home">
-      {/* Hero */}
-      <section className="hero">
+      {/* Hero with cycling background */}
+      <section
+        className="hero"
+        style={{
+          backgroundImage: `linear-gradient(135deg, rgba(0,0,0,0.5), rgba(0,0,0,0.28)), url('${heroImages[heroIndex]}')`,
+        }}
+      >
         <div className="hero-content">
           <h1>Khám phá Đà Nẵng</h1>
           <p>Thành phố đáng sống nhất Việt Nam — Biển xanh, cát trắng, nắng vàng</p>
           <Link to="/tours" className="btn-primary">
             🗺️ Khám phá ngay
           </Link>
+        </div>
+        <div className="hero-dots">
+          {heroImages.map((_, i) => (
+            <button
+              key={i}
+              className={`hero-dot${i === heroIndex ? ' active' : ''}`}
+              onClick={() => setHeroIndex(i)}
+              aria-label={`Hero image ${i + 1}`}
+            />
+          ))}
         </div>
       </section>
 
@@ -62,13 +101,47 @@ const Home = () => {
         </div>
       </div>
 
+      {/* Intro Section */}
+      <section className="intro-section">
+        <div className="intro-inner">
+          <h2>Tại sao nên chọn Đà Nẵng?</h2>
+          <p className="intro-desc">
+            Đà Nẵng — thành phố của những điều kỳ diệu. Với bãi biển xanh biếc, ẩm thực phong phú,
+            lịch sử văn hóa độc đáo và con người thân thiện, đây là điểm đến không thể bỏ qua khi
+            du lịch Việt Nam.
+          </p>
+          <div className="intro-features">
+            <div className="intro-feature">
+              <span className="feature-icon">🏖️</span>
+              <h3>Biển đẹp nhất</h3>
+              <p>Bãi biển Mỹ Khê, Non Nước với làn nước trong xanh tuyệt đẹp</p>
+            </div>
+            <div className="intro-feature">
+              <span className="feature-icon">🍜</span>
+              <h3>Ẩm thực đặc sắc</h3>
+              <p>Mì Quảng, Bún cá, Bánh mì Đà Nẵng nức tiếng khắp nơi</p>
+            </div>
+            <div className="intro-feature">
+              <span className="feature-icon">🌉</span>
+              <h3>Cây cầu độc đáo</h3>
+              <p>Cầu Rồng, Cầu Vàng Bà Nà Hills — biểu tượng của Đà Nẵng</p>
+            </div>
+            <div className="intro-feature">
+              <span className="feature-icon">🎉</span>
+              <h3>Lễ hội sôi động</h3>
+              <p>Lễ hội pháo hoa quốc tế DIFF hàng năm thu hút hàng triệu du khách</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Địa điểm */}
       <section className="section">
         <div className="section-header">
           <h2>📍 Địa điểm nổi bật</h2>
           <Link to="/places">Xem tất cả →</Link>
         </div>
-        <div className="card-grid">
+        <div className="card-slider">
           {places.map((place) => (
             <Card
               key={place._id}
@@ -87,7 +160,7 @@ const Home = () => {
           <h2>🗺️ Tour du lịch</h2>
           <Link to="/tours">Xem tất cả →</Link>
         </div>
-        <div className="card-grid">
+        <div className="card-slider">
           {tours.map((tour) => (
             <Card
               key={tour._id}
@@ -107,7 +180,7 @@ const Home = () => {
           <h2>🍜 Ẩm thực Đà Nẵng</h2>
           <Link to="/foods">Xem tất cả →</Link>
         </div>
-        <div className="card-grid">
+        <div className="card-slider">
           {foods.map((food) => (
             <Card
               key={food._id}
@@ -119,6 +192,47 @@ const Home = () => {
           ))}
         </div>
       </section>
+
+      {/* Video Section */}
+      <section className="video-section">
+        <div className="video-section-inner">
+          <h2>🎬 Khám Phá Đà Nẵng Qua Video</h2>
+          <p>Chiêm ngưỡng vẻ đẹp tuyệt vời của thành phố biển qua góc nhìn flycam</p>
+          <div className="video-wrapper">
+            <iframe
+              src="https://www.youtube.com/embed/o8T3HGgaLQ0"
+              title="Khám phá Đà Nẵng"
+              frameBorder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* Reviews Slider */}
+      {reviews.length > 0 && (
+        <section className="section reviews-section">
+          <div className="section-header">
+            <h2>⭐ Du Khách Nói Gì Về Đà Nẵng</h2>
+          </div>
+          <div className="reviews-slider">
+            {reviews.map((review) => (
+              <div key={review._id} className="review-card-home">
+                <div className="review-avatar">
+                  {review.user?.hoTen?.[0]?.toUpperCase() || '?'}
+                </div>
+                <div className="review-stars">
+                  {'★'.repeat(review.sao)}
+                  <span className="review-stars-empty">{'★'.repeat(5 - review.sao)}</span>
+                </div>
+                <p className="review-text">{review.noiDung}</p>
+                <span className="review-author">{review.user?.hoTen || 'Khách du lịch'}</span>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
     </div>
   );
 };
