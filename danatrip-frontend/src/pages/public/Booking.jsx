@@ -6,6 +6,8 @@ import { toast } from 'react-toastify';
 import Loading from '../../components/common/Loading';
 import '../../styles/booking.css';
 
+const VN_PHONE_REGEX = /^(0|\+84)(3[2-9]|5[6|8|9]|7[0|6|7|8|9]|8[0-9]|9[0-9])[0-9]{7}$/;
+
 const Booking = () => {
   const { tourId } = useParams();
   const { user } = useAuth();
@@ -70,7 +72,12 @@ const Booking = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validate
+    // Validate phone number (VN format)
+    if (form.sdt && !VN_PHONE_REGEX.test(form.sdt)) {
+      return toast.error('Số điện thoại không hợp lệ (định dạng Việt Nam)');
+    }
+
+    // Validate available spots
     if (form.soNguoiLon + form.soTreEm > soChoConLai) {
       return toast.error(`Tour chỉ còn ${soChoConLai} chỗ trống`);
     }
@@ -96,6 +103,8 @@ const Booking = () => {
 
   if (loading) return <Loading />;
   if (!tour) return <p className="page-container">Không tìm thấy tour</p>;
+
+  const coverImage = tour.hinhAnh?.[0]?.urlAnh;
 
   return (
     <div className="page-container">
@@ -124,7 +133,7 @@ const Booking = () => {
                 name="sdt"
                 value={form.sdt}
                 onChange={handleChange}
-                placeholder="Nhập số điện thoại"
+                placeholder="VD: 0912345678"
                 required
               />
             </div>
@@ -169,17 +178,26 @@ const Booking = () => {
 
             <div className="form-group">
               <label>Phương thức thanh toán</label>
-              <select
-                name="phuongThucThanhToan"
-                value={form.phuongThucThanhToan}
-                onChange={handleChange}
-              >
-                <option value="Cash">Tiền mặt</option>
-                <option value="Momo">Momo</option>
-                <option value="ZaloPay">ZaloPay</option>
-                <option value="VNPay">VNPay</option>
-                <option value="BankTransfer">Chuyển khoản</option>
-              </select>
+              <div className="payment-methods">
+                {[
+                  { value: 'Cash', label: '💵 Tiền mặt' },
+                  { value: 'Momo', label: '🟣 Momo' },
+                  { value: 'ZaloPay', label: '🔵 ZaloPay' },
+                  { value: 'VNPay', label: '🔴 VNPay' },
+                  { value: 'BankTransfer', label: '🏦 Chuyển khoản' },
+                ].map((method) => (
+                  <label key={method.value} className="payment-option">
+                    <input
+                      type="radio"
+                      name="phuongThucThanhToan"
+                      value={method.value}
+                      checked={form.phuongThucThanhToan === method.value}
+                      onChange={handleChange}
+                    />
+                    <span>{method.label}</span>
+                  </label>
+                ))}
+              </div>
             </div>
 
             <div className="form-group">
@@ -201,6 +219,15 @@ const Booking = () => {
           {/* Thông tin tour & tổng tiền */}
           <div className="booking-summary">
             <div className="summary-card">
+              {/* Tour image */}
+              {coverImage && (
+                <img
+                  src={coverImage}
+                  alt={tour.tenTour}
+                  className="summary-tour-image"
+                />
+              )}
+
               <h2>{tour.tenTour}</h2>
               <p className="summary-location">
                 📍 {tour.diaDiem?.tenDiaDiem || 'Đà Nẵng'}
