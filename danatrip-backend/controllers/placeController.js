@@ -7,7 +7,8 @@ exports.getPlaces = async (req, res) => {
     const query = { hienThi: true };
 
     if (req.query.search) {
-      query.tenDiaDiem = { $regex: req.query.search, $options: 'i' };
+      const escaped = req.query.search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      query.tenDiaDiem = { $regex: escaped, $options: 'i' };
     }
 
     const places = await Place.find(query)

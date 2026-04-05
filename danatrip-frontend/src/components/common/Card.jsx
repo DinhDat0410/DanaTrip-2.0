@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { getImageUrl } from '../../utils/image';
 import '../../styles/card.css';
+import { getImageUrl } from '../../utils/image';
 
 const Card = ({ image, title, description, link, price }) => {
   return (

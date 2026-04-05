@@ -4,11 +4,11 @@ const Tour = require('../models/Tour');
 // @route   GET /api/tours
 exports.getTours = async (req, res) => {
   try {
-    // Hỗ trợ filter theo địa điểm, tag, giá
     const query = { hienThi: true };
 
     if (req.query.search) {
-      query.tenTour = { $regex: req.query.search, $options: 'i' };
+      const escaped = req.query.search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      query.tenTour = { $regex: escaped, $options: 'i' };
     }
 
     if (req.query.diaDiem) {

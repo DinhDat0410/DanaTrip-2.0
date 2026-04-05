@@ -12,8 +12,7 @@ const Places = () => {
   useEffect(() => {
     const fetchPlaces = async () => {
       try {
-        const params = search ? `?search=${encodeURIComponent(search)}` : '';
-        const res = await API.get(`/places${params}`);
+        const res = await API.get(`/places${search ? '?search=' + search : ''}`);
         setPlaces(res.data.data || []);
       } catch (error) {
         console.error('Lỗi:', error);
@@ -26,11 +25,8 @@ const Places = () => {
 
   const handleSearch = (e) => {
     e.preventDefault();
-    const value = e.target.elements.search.value;
-    if (value !== search) {
-      setLoading(true);
-      setSearch(value);
-    }
+    setLoading(true);
+    setSearch(e.target.elements.search.value);
   };
 
   if (loading) return <Loading />;
@@ -39,6 +35,7 @@ const Places = () => {
     <div className="page-container">
       <h1>📍 Địa điểm du lịch Đà Nẵng</h1>
 
+      {/* Thanh tìm kiếm */}
       <form onSubmit={handleSearch} className="search-bar">
         <input
           type="text"
@@ -46,7 +43,7 @@ const Places = () => {
           placeholder="Tìm địa điểm... (vd: Bà Nà, Sơn Trà)"
           className="search-input"
         />
-        <button type="submit" className="btn-search">🔍 Tìm kiếm</button>
+        <button type="submit" className="btn-search">Tìm kiếm</button>
       </form>
 
       <div className="card-grid">
@@ -60,7 +57,7 @@ const Places = () => {
           />
         ))}
       </div>
-      {places.length === 0 && <p>Chưa có địa điểm nào.</p>}
+      {places.length === 0 && <p>Không tìm thấy địa điểm nào.</p>}
     </div>
   );
 };
