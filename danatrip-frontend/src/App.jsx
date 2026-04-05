@@ -35,6 +35,8 @@ import AdminFoodEdit from './pages/admin/AdminFoodEdit';
 import AdminBookings from './pages/admin/AdminBooking';
 import AdminReviews from './pages/admin/AdminReview';
 import AdminContacts from './pages/admin/AdminContact';
+import AdminUsers from './pages/admin/AdminUser';
+import AdminUserEdit from './pages/admin/AdminUserEdit';
 
 function App() {
   return (
@@ -74,6 +76,9 @@ function App() {
             <Route path="bookings" element={<AdminBookings />} />
             <Route path="reviews" element={<AdminReviews />} />
             <Route path="contacts" element={<AdminContacts />} />
+            <Route path="users" element={<AdminUsers />} />
+            <Route path="users/new" element={<AdminUserEdit />} />
+            <Route path="users/edit/:id" element={<AdminUserEdit />} />
           </Route>
         </Routes>
         <ChatWidget />
