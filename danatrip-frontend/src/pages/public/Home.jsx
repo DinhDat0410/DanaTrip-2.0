@@ -19,7 +19,7 @@ const Home = () => {
   const [loading, setLoading] = useState(true);
   const [heroIndex, setHeroIndex] = useState(0);
 
-  // Cycle hero background images
+  // Cycles hero background images
   useEffect(() => {
     const interval = setInterval(() => {
       setHeroIndex((prev) => (prev + 1) % heroImages.length);
@@ -39,12 +39,14 @@ const Home = () => {
         setTours(toursRes.data.data?.slice(0, 4) || []);
         setFoods(foodsRes.data.data?.slice(0, 4) || []);
 
-        // Load public reviews for home page (gracefully ignore auth errors)
+        // Reviews endpoint requires admin auth — log non-auth errors and skip
         try {
           const reviewsRes = await API.get('/reviews');
           setReviews(reviewsRes.data.data?.slice(0, 6) || []);
-        } catch {
-          // reviews endpoint requires admin auth — silently skip
+        } catch (reviewsErr) {
+          if (reviewsErr.response?.status !== 401 && reviewsErr.response?.status !== 403) {
+            console.error('Lỗi tải đánh giá:', reviewsErr);
+          }
         }
       } catch (error) {
         console.error('Lỗi tải dữ liệu:', error);
