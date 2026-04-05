@@ -1,11 +1,12 @@
 import { Link } from 'react-router-dom';
 import '../../styles/card.css';
+import { getImageUrl } from '../../utils/image';
 
 const Card = ({ image, title, description, link, price }) => {
   return (
     <div className="card">
       <div className="card-image">
-        <img src={image || '/images/placeholder.jpg'} alt={title} />
+        <img src={getImageUrl(image)} alt={title} />
       </div>
       <div className="card-body">
         <h3 className="card-title">{title}</h3>

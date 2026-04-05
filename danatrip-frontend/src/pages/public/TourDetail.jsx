@@ -6,6 +6,7 @@ import { useAuth } from '../../hooks/useAuth';
 import { FaCheck, FaTimes, FaClock, FaCalendarAlt, FaUsers } from 'react-icons/fa';
 import '../../styles/detail.css';
 import '../../styles/tourDetail.css';
+import { getImageUrl } from '../../utils/image';
 
 const TourDetail = () => {
   const { id } = useParams();
@@ -54,7 +55,7 @@ const TourDetail = () => {
         {/* Cover Image */}
         {coverImage && (
           <img
-            src={coverImage}
+            src={getImageUrl(coverImage)}
             alt={tour.tenTour}
             className="tour-cover-image"
           />

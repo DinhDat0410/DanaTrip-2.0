@@ -4,7 +4,14 @@ const Place = require('../models/Place');
 // @route   GET /api/places
 exports.getPlaces = async (req, res) => {
   try {
-    const places = await Place.find({ hienThi: true })
+    const query = { hienThi: true };
+
+    if (req.query.search) {
+      const escaped = req.query.search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      query.tenDiaDiem = { $regex: escaped, $options: 'i' };
+    }
+
+    const places = await Place.find(query)
       .select('tenDiaDiem noiDung hinhAnhChinh viTri')
       .sort('-createdAt');
 

@@ -4,6 +4,7 @@ import API from '../../api/axios';
 import Loading from '../../components/common/Loading';
 import { FaArrowLeft } from 'react-icons/fa';
 import '../../styles/foodDetail.css';
+import { getImageUrl } from '../../utils/image';
 
 const FoodDetail = () => {
   const { id } = useParams();
@@ -45,7 +46,7 @@ const FoodDetail = () => {
         {food.albumAnh?.length > 0 && (
           <div className="image-wrapper">
             {food.albumAnh.slice(0, 3).map((img, i) => (
-              <img key={i} className="anh-mon" src={img.urlAnh} alt={`${food.tenMon} ${i + 1}`} />
+              <img key={i} className="anh-mon" src={getImageUrl(img.urlAnh)} alt={`${food.tenMon} ${i + 1}`} />
             ))}
           </div>
         )}
