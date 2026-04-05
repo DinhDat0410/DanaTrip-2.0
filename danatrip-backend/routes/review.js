@@ -3,6 +3,7 @@ const router = express.Router();
 const {
   getReviewsByTour,
   getAllReviews,
+  getPublicReviews,   // ⬅️ Thêm hàm mới
   createReview,
   updateReview,
   deleteReview,
@@ -12,6 +13,7 @@ const { adminOnly } = require('../middleware/admin');
 
 // Public
 router.get('/tour/:tourId', getReviewsByTour);
+router.get('/public', getPublicReviews);
 
 // User (cần đăng nhập)
 router.post('/', protect, createReview);

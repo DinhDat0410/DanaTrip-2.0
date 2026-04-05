@@ -184,3 +184,19 @@ exports.deleteReview = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+exports.getPublicReviews = async (req, res) => {
+  try {
+    const reviews = await Review.find()
+      .populate('user', 'hoTen avatar')
+      .sort('-createdAt')
+      .limit(6);
+
+    res.status(200).json({
+      success: true,
+      count: reviews.length,
+      data: reviews,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};

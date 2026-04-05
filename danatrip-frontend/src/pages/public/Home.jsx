@@ -1,14 +1,14 @@
-import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import API from '../../api/axios';
-import Card from '../../components/common/Card';
-import Loading from '../../components/common/Loading';
-import '../../styles/home.css';
+import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import API from "../../api/axios";
+import Card from "../../components/common/Card";
+import Loading from "../../components/common/Loading";
+import "../../styles/home.css";
 
 const heroImages = [
-  '/images/danang-hero.jpg',
-  '/images/danang-hero2.jpg',
-  '/images/danang-hero3.jpg',
+  "../../images/danang-hero.jpg",
+  "../../images/danang-hero2.jpg",
+  "../../images/danang-hero3.jpg",
 ];
 
 const Home = () => {
@@ -31,9 +31,9 @@ const Home = () => {
     const fetchData = async () => {
       try {
         const [placesRes, toursRes, foodsRes] = await Promise.all([
-          API.get('/places'),
-          API.get('/tours'),
-          API.get('/foods'),
+          API.get("/places"),
+          API.get("/tours"),
+          API.get("/foods"),
         ]);
         setPlaces(placesRes.data.data?.slice(0, 4) || []);
         setTours(toursRes.data.data?.slice(0, 4) || []);
@@ -41,13 +41,13 @@ const Home = () => {
 
         // Load public reviews for home page (gracefully ignore auth errors)
         try {
-          const reviewsRes = await API.get('/reviews');
+          const reviewsRes = await API.get("/reviews/public");
           setReviews(reviewsRes.data.data?.slice(0, 6) || []);
         } catch {
-          // reviews endpoint requires admin auth — silently skip
+          // silently skip
         }
       } catch (error) {
-        console.error('Lỗi tải dữ liệu:', error);
+        console.error("Lỗi tải dữ liệu:", error);
       } finally {
         setLoading(false);
       }
@@ -68,7 +68,9 @@ const Home = () => {
       >
         <div className="hero-content">
           <h1>Khám phá Đà Nẵng</h1>
-          <p>Thành phố đáng sống nhất Việt Nam — Biển xanh, cát trắng, nắng vàng</p>
+          <p>
+            Thành phố đáng sống nhất Việt Nam — Biển xanh, cát trắng, nắng vàng
+          </p>
           <Link to="/tours" className="btn-primary">
             🗺️ Khám phá ngay
           </Link>
@@ -77,7 +79,7 @@ const Home = () => {
           {heroImages.map((_, i) => (
             <button
               key={i}
-              className={`hero-dot${i === heroIndex ? ' active' : ''}`}
+              className={`hero-dot${i === heroIndex ? " active" : ""}`}
               onClick={() => setHeroIndex(i)}
               aria-label={`Hero image ${i + 1}`}
             />
@@ -106,9 +108,9 @@ const Home = () => {
         <div className="intro-inner">
           <h2>Tại sao nên chọn Đà Nẵng?</h2>
           <p className="intro-desc">
-            Đà Nẵng — thành phố của những điều kỳ diệu. Với bãi biển xanh biếc, ẩm thực phong phú,
-            lịch sử văn hóa độc đáo và con người thân thiện, đây là điểm đến không thể bỏ qua khi
-            du lịch Việt Nam.
+            Đà Nẵng — thành phố của những điều kỳ diệu. Với bãi biển xanh biếc,
+            ẩm thực phong phú, lịch sử văn hóa độc đáo và con người thân thiện,
+            đây là điểm đến không thể bỏ qua khi du lịch Việt Nam.
           </p>
           <div className="intro-features">
             <div className="intro-feature">
@@ -129,7 +131,10 @@ const Home = () => {
             <div className="intro-feature">
               <span className="feature-icon">🎉</span>
               <h3>Lễ hội sôi động</h3>
-              <p>Lễ hội pháo hoa quốc tế DIFF hàng năm thu hút hàng triệu du khách</p>
+              <p>
+                Lễ hội pháo hoa quốc tế DIFF hàng năm thu hút hàng triệu du
+                khách
+              </p>
             </div>
           </div>
         </div>
@@ -197,10 +202,12 @@ const Home = () => {
       <section className="video-section">
         <div className="video-section-inner">
           <h2>🎬 Khám Phá Đà Nẵng Qua Video</h2>
-          <p>Chiêm ngưỡng vẻ đẹp tuyệt vời của thành phố biển qua góc nhìn flycam</p>
+          <p>
+            Chiêm ngưỡng vẻ đẹp tuyệt vời của thành phố biển qua góc nhìn flycam
+          </p>
           <div className="video-wrapper">
             <iframe
-              src="https://www.youtube.com/embed/o8T3HGgaLQ0"
+              src="https://www.youtube.com/embed/lQwdFuu7NJE"
               title="Khám phá Đà Nẵng"
               frameBorder="0"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -220,14 +227,18 @@ const Home = () => {
             {reviews.map((review) => (
               <div key={review._id} className="review-card-home">
                 <div className="review-avatar">
-                  {review.user?.hoTen?.[0]?.toUpperCase() || '?'}
+                  {review.user?.hoTen?.[0]?.toUpperCase() || "?"}
                 </div>
                 <div className="review-stars">
-                  {'★'.repeat(review.sao)}
-                  <span className="review-stars-empty">{'★'.repeat(5 - review.sao)}</span>
+                  {"★".repeat(review.sao)}
+                  <span className="review-stars-empty">
+                    {"★".repeat(5 - review.sao)}
+                  </span>
                 </div>
                 <p className="review-text">{review.noiDung}</p>
-                <span className="review-author">{review.user?.hoTen || 'Khách du lịch'}</span>
+                <span className="review-author">
+                  {review.user?.hoTen || "Khách du lịch"}
+                </span>
               </div>
             ))}
           </div>
