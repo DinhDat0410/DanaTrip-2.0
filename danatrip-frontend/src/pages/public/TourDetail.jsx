@@ -7,7 +7,6 @@ import { FaCheck, FaTimes, FaClock, FaCalendarAlt, FaUsers } from 'react-icons/f
 import { getImageUrl } from '../../utils/image';
 import '../../styles/detail.css';
 import '../../styles/tourDetail.css';
-import { getImageUrl } from '../../utils/image';
 
 const TourDetail = () => {
   const { id } = useParams();

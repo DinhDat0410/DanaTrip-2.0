@@ -3,7 +3,6 @@ import { useParams, Link } from 'react-router-dom';
 import API from '../../api/axios';
 import Loading from '../../components/common/Loading';
 import { FaArrowLeft } from 'react-icons/fa';
-import { getImageUrl } from '../../utils/image';
 import '../../styles/foodDetail.css';
 import { getImageUrl } from '../../utils/image';
 
