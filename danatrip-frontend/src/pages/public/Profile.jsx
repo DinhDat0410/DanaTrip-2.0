@@ -39,7 +39,9 @@ const Profile = () => {
   const fetchMyReviews = async () => {
     try {
       const res = await API.get('/reviews/my');
-      const tourIds = (res.data.data || []).map((r) => r.tour?._id?.toString());
+      const tourIds = (res.data.data || [])
+        .map((r) => r.tour?._id?.toString())
+        .filter(Boolean);
       setReviewedTours(tourIds);
     } catch (error) {
       console.error('Lỗi lấy đánh giá:', error);
@@ -146,15 +148,12 @@ const Profile = () => {
             ) : bookings.length > 0 ? (
               <div className="booking-list">
                 {bookings.map((booking) => {
-                  const tourId = booking.tour?._id?.toString();
-                  const canReview =
+                  const tourId = booking.tour?._id?.toString() || '';
+                  const isEligibleForReview =
                     (booking.trangThai === 'Đã xác nhận' || booking.trangThai === 'Đã thanh toán') &&
-                    tourId &&
-                    !reviewedTours.includes(tourId);
-                  const hasReviewed =
-                    (booking.trangThai === 'Đã xác nhận' || booking.trangThai === 'Đã thanh toán') &&
-                    tourId &&
-                    reviewedTours.includes(tourId);
+                    !!tourId;
+                  const canReview = isEligibleForReview && !reviewedTours.includes(tourId);
+                  const hasReviewed = isEligibleForReview && reviewedTours.includes(tourId);
 
                   return (
                     <div key={booking._id} className="booking-card">
