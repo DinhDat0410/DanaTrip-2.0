@@ -30,6 +30,7 @@ const Header = () => {
           <Link to="/places" onClick={() => setMenuOpen(false)}>Địa điểm</Link>
           <Link to="/tours" onClick={() => setMenuOpen(false)}>Tour</Link>
           <Link to="/foods" onClick={() => setMenuOpen(false)}>Ẩm thực</Link>
+          <Link to="/reviews" onClick={() => setMenuOpen(false)}>Đánh giá</Link>
           <Link to="/contact" onClick={() => setMenuOpen(false)}>Liên hệ</Link>
 
           {isAdmin && (

@@ -23,6 +23,7 @@ import Contact from './pages/public/Contact';
 import Login from './pages/public/Login';
 import Register from './pages/public/Register';
 import Profile from './pages/public/Profile';
+import Reviews from './pages/public/Reviews';
 
 // Admin Pages
 import Dashboard from './pages/admin/Dashboard';
@@ -54,6 +55,7 @@ function App() {
             <Route path="foods" element={<Foods />} />
             <Route path="foods/:id" element={<FoodDetail />} />
             <Route path="contact" element={<Contact />} />
+            <Route path="reviews" element={<Reviews />} />
             <Route path="login" element={<Login />} />
             <Route path="register" element={<Register />} />
             <Route path="booking/:tourId" element={<ProtectedRoute><Booking /></ProtectedRoute>} />
