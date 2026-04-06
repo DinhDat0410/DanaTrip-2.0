@@ -188,8 +188,27 @@ exports.getPublicReviews = async (req, res) => {
   try {
     const reviews = await Review.find()
       .populate('user', 'hoTen avatar')
+      .populate('tour', 'tenTour')
       .sort('-createdAt')
-      .limit(6);
+      .limit(20);
+
+    res.status(200).json({
+      success: true,
+      count: reviews.length,
+      data: reviews,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// @desc    Lấy đánh giá của user hiện tại
+// @route   GET /api/reviews/my
+exports.getMyReviews = async (req, res) => {
+  try {
+    const reviews = await Review.find({ user: req.user._id })
+      .populate('tour', 'tenTour')
+      .sort('-createdAt');
 
     res.status(200).json({
       success: true,

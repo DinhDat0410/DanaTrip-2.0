@@ -3,7 +3,8 @@ const router = express.Router();
 const {
   getReviewsByTour,
   getAllReviews,
-  getPublicReviews,   // ⬅️ Thêm hàm mới
+  getPublicReviews,
+  getMyReviews,
   createReview,
   updateReview,
   deleteReview,
@@ -16,6 +17,7 @@ router.get('/tour/:tourId', getReviewsByTour);
 router.get('/public', getPublicReviews);
 
 // User (cần đăng nhập)
+router.get('/my', protect, getMyReviews);
 router.post('/', protect, createReview);
 router.put('/:id', protect, updateReview);
 router.delete('/:id', protect, deleteReview);
