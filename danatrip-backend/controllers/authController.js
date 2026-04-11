@@ -118,8 +118,8 @@ exports.socialLogin = async (req, res) => {
   try {
     const { email, hoTen, avatar, provider } = req.body;
 
-    const emailRegex = /^\S+@\S+\.\S+$/;
-    if (!email || !emailRegex.test(email)) {
+    const emailRegex = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
+    if (!email || typeof email !== 'string' || !emailRegex.test(email)) {
       return res.status(400).json({
         success: false,
         message: 'Email không hợp lệ từ tài khoản mạng xã hội',
@@ -139,7 +139,7 @@ exports.socialLogin = async (req, res) => {
       user = await User.create({
         hoTen: hoTen || email.split('@')[0],
         email,
-        matKhau: crypto.randomBytes(16).toString('hex') + 'A1!',
+        matKhau: crypto.randomBytes(32).toString('base64'),
         avatar: avatar || '',
         provider,
       });
