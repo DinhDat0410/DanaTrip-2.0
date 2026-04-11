@@ -41,6 +41,11 @@ const UserSchema = new mongoose.Schema(
       enum: ['Hoạt động', 'Bị khóa'],
       default: 'Hoạt động',
     },
+    provider: {
+      type: String,
+      enum: ['local', 'google'],
+      default: 'local',
+    },
     hienThi: {
       type: Boolean,
       default: true,

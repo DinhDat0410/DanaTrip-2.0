@@ -1,4 +1,5 @@
 const User = require('../models/User');
+const crypto = require('crypto');
 
 // @desc    Đăng ký
 // @route   POST /api/auth/register
@@ -109,4 +110,66 @@ exports.getMe = async (req, res) => {
     success: true,
     user,
   });
+};
+
+// @desc    Đăng nhập bằng mạng xã hội (Google)
+// @route   POST /api/auth/social-login
+exports.socialLogin = async (req, res) => {
+  try {
+    const { email, hoTen, avatar, provider } = req.body;
+
+    const emailRegex = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
+    if (!email || typeof email !== 'string' || !emailRegex.test(email)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email không hợp lệ từ tài khoản mạng xã hội',
+      });
+    }
+
+    if (provider !== 'google') {
+      return res.status(400).json({
+        success: false,
+        message: 'Provider không hợp lệ',
+      });
+    }
+
+    let user = await User.findOne({ email });
+
+    if (!user) {
+      user = await User.create({
+        hoTen: hoTen || email.split('@')[0],
+        email,
+        matKhau: crypto.randomBytes(32).toString('base64'),
+        avatar: avatar || '',
+        provider,
+      });
+    }
+
+    if (user.trangThai === 'Bị khóa') {
+      return res.status(403).json({
+        success: false,
+        message: 'Tài khoản đã bị khóa',
+      });
+    }
+
+    const token = user.getSignedJwtToken();
+
+    res.status(200).json({
+      success: true,
+      token,
+      user: {
+        id: user._id,
+        hoTen: user.hoTen,
+        email: user.email,
+        vaiTro: user.vaiTro,
+        avatar: user.avatar,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Lỗi server',
+      error: error.message,
+    });
+  }
 };

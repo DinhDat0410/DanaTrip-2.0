@@ -54,6 +54,19 @@ export const AuthProvider = ({ children }) => {
     return userData;
   };
 
+  // Đăng nhập bằng mạng xã hội
+  const socialLogin = async (email, hoTen, avatar, provider) => {
+    const res = await API.post('/auth/social-login', { email, hoTen, avatar, provider });
+    const { token: newToken, user: userData } = res.data;
+
+    localStorage.setItem('token', newToken);
+    localStorage.setItem('user', JSON.stringify(userData));
+    setToken(newToken);
+    setUser(userData);
+
+    return userData;
+  };
+
   // Đăng xuất
   const logout = () => {
     localStorage.removeItem('token');
@@ -71,6 +84,7 @@ export const AuthProvider = ({ children }) => {
         login,
         register,
         logout,
+        socialLogin,
         isAuthenticated: !!token,
         isAdmin: user?.vaiTro === 'Admin',
       }}
