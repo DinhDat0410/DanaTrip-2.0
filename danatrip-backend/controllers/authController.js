@@ -110,3 +110,57 @@ exports.getMe = async (req, res) => {
     user,
   });
 };
+
+// @desc    Đăng nhập bằng mạng xã hội (Google)
+// @route   POST /api/auth/social-login
+exports.socialLogin = async (req, res) => {
+  try {
+    const { email, hoTen, avatar, provider } = req.body;
+
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email không hợp lệ từ tài khoản mạng xã hội',
+      });
+    }
+
+    let user = await User.findOne({ email });
+
+    if (!user) {
+      user = await User.create({
+        hoTen: hoTen || email.split('@')[0],
+        email,
+        matKhau: Math.random().toString(36).slice(-12) + 'A1!',
+        avatar: avatar || '',
+        provider: provider || 'local',
+      });
+    }
+
+    if (user.trangThai === 'Bị khóa') {
+      return res.status(403).json({
+        success: false,
+        message: 'Tài khoản đã bị khóa',
+      });
+    }
+
+    const token = user.getSignedJwtToken();
+
+    res.status(200).json({
+      success: true,
+      token,
+      user: {
+        id: user._id,
+        hoTen: user.hoTen,
+        email: user.email,
+        vaiTro: user.vaiTro,
+        avatar: user.avatar,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Lỗi server',
+      error: error.message,
+    });
+  }
+};
