@@ -1,4 +1,5 @@
 const User = require('../models/User');
+const crypto = require('crypto');
 
 // @desc    Đăng ký
 // @route   POST /api/auth/register
@@ -117,10 +118,18 @@ exports.socialLogin = async (req, res) => {
   try {
     const { email, hoTen, avatar, provider } = req.body;
 
-    if (!email) {
+    const emailRegex = /^\S+@\S+\.\S+$/;
+    if (!email || !emailRegex.test(email)) {
       return res.status(400).json({
         success: false,
         message: 'Email không hợp lệ từ tài khoản mạng xã hội',
+      });
+    }
+
+    if (provider !== 'google') {
+      return res.status(400).json({
+        success: false,
+        message: 'Provider không hợp lệ',
       });
     }
 
@@ -130,9 +139,9 @@ exports.socialLogin = async (req, res) => {
       user = await User.create({
         hoTen: hoTen || email.split('@')[0],
         email,
-        matKhau: Math.random().toString(36).slice(-12) + 'A1!',
+        matKhau: crypto.randomBytes(16).toString('hex') + 'A1!',
         avatar: avatar || '',
-        provider: provider || 'local',
+        provider,
       });
     }
 

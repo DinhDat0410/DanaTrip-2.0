@@ -47,7 +47,12 @@ const Login = () => {
       toast.success(`Xin chào, ${user.hoTen}!`);
       navigate(user.vaiTro === 'Admin' ? '/admin' : '/');
     } catch (error) {
-      toast.error('Đăng nhập Google thất bại');
+      const msg = error.code === 'auth/popup-closed-by-user'
+        ? 'Đăng nhập bị hủy'
+        : error.code === 'auth/network-request-failed'
+        ? 'Lỗi kết nối mạng'
+        : 'Đăng nhập Google thất bại';
+      toast.error(msg);
       console.error(error);
     }
   };
