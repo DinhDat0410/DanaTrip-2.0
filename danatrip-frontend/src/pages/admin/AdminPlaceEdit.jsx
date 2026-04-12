@@ -8,7 +8,7 @@ import "../../styles/adminForm.css";
 import ImageUpload from "../../components/common/ImageUpload";
 
 const AdminPlaceEdit = () => {
-  const { id } = useParams(); // nếu có id → sửa, không có → thêm mới
+  const { id } = useParams();
   const navigate = useNavigate();
   const isEdit = !!id;
 
@@ -22,10 +22,10 @@ const AdminPlaceEdit = () => {
     viTri: "Đà Nẵng",
     hienThi: true,
     diemThamQuan: [],
+    thongTin: [],
     view360: [],
   });
 
-  // Load dữ liệu khi sửa
   useEffect(() => {
     if (isEdit) {
       const fetchPlace = async () => {
@@ -39,6 +39,7 @@ const AdminPlaceEdit = () => {
             viTri: data.viTri || "Đà Nẵng",
             hienThi: data.hienThi !== false,
             diemThamQuan: data.diemThamQuan || [],
+            thongTin: data.thongTin || [],
             view360: data.view360 || [],
           });
         } catch (error) {
@@ -64,7 +65,10 @@ const AdminPlaceEdit = () => {
   const addDiemThamQuan = () => {
     setForm((prev) => ({
       ...prev,
-      diemThamQuan: [...prev.diemThamQuan, { tenDiem: "", moTa: "" }],
+      diemThamQuan: [
+        ...prev.diemThamQuan,
+        { tenDiem: "", moTa: "", hinhAnh: "" },
+      ],
     }));
   };
 
@@ -76,6 +80,8 @@ const AdminPlaceEdit = () => {
     });
   };
 
+
+
   const removeDiemThamQuan = (index) => {
     setForm((prev) => ({
       ...prev,
@@ -83,11 +89,34 @@ const AdminPlaceEdit = () => {
     }));
   };
 
+  // === Thông tin hữu ích ===
+  const addThongTin = () => {
+    setForm((prev) => ({
+      ...prev,
+      thongTin: [...prev.thongTin, { tieuDe: "", noiDung: "" }],
+    }));
+  };
+
+  const updateThongTin = (index, field, value) => {
+    setForm((prev) => {
+      const updated = [...prev.thongTin];
+      updated[index] = { ...updated[index], [field]: value };
+      return { ...prev, thongTin: updated };
+    });
+  };
+
+  const removeThongTin = (index) => {
+    setForm((prev) => ({
+      ...prev,
+      thongTin: prev.thongTin.filter((_, i) => i !== index),
+    }));
+  };
+
   // === View 360 ===
   const addView360 = () => {
     setForm((prev) => ({
       ...prev,
-      view360: [...prev.view360, { tieuDe: "", link360: "" }],
+      view360: [...prev.view360, { tieuDe: "", link360: "", thumbnail: "" }],
     }));
   };
 
@@ -207,7 +236,7 @@ const AdminPlaceEdit = () => {
           </div>
         </div>
 
-        {/* Điểm tham quan */}
+        {/* Điểm tham quan - có hình ảnh */}
         <div className="form-section">
           <div className="section-header">
             <h2>🏛️ Điểm tham quan</h2>
@@ -221,32 +250,48 @@ const AdminPlaceEdit = () => {
           </div>
 
           {form.diemThamQuan.map((diem, i) => (
-            <div key={i} className="dynamic-item">
-              <div className="dynamic-item-fields">
-                <input
-                  type="text"
-                  value={diem.tenDiem}
-                  onChange={(e) =>
-                    updateDiemThamQuan(i, "tenDiem", e.target.value)
-                  }
-                  placeholder="Tên điểm tham quan"
-                />
-                <input
-                  type="text"
-                  value={diem.moTa}
-                  onChange={(e) =>
-                    updateDiemThamQuan(i, "moTa", e.target.value)
-                  }
-                  placeholder="Mô tả"
-                />
-              </div>
+            <div key={i} className="spot-card">
               <button
                 type="button"
                 onClick={() => removeDiemThamQuan(i)}
-                className="btn-remove-item"
+                className="spot-card-remove"
               >
                 <FaTrash />
               </button>
+              <div className="spot-card-info">
+                <span className="spot-card-number">{i + 1}</span>
+                <div className="spot-card-fields">
+                  <div className="form-group">
+                    <label>Tên điểm tham quan</label>
+                    <input
+                      type="text"
+                      value={diem.tenDiem}
+                      onChange={(e) =>
+                        updateDiemThamQuan(i, "tenDiem", e.target.value)
+                      }
+                      placeholder="VD: Chùa Linh Ứng"
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Mô tả</label>
+                    <textarea
+                      value={diem.moTa}
+                      onChange={(e) =>
+                        updateDiemThamQuan(i, "moTa", e.target.value)
+                      }
+                      placeholder="Mô tả ngắn về điểm tham quan..."
+                      rows={3}
+                    />
+                  </div>
+                </div>
+              </div>
+              <div className="spot-card-image">
+                <ImageUpload
+                  label="Hình ảnh"
+                  value={diem.hinhAnh}
+                  onChange={(url) => updateDiemThamQuan(i, "hinhAnh", url)}
+                />
+              </div>
             </div>
           ))}
 
@@ -257,7 +302,57 @@ const AdminPlaceEdit = () => {
           )}
         </div>
 
-        {/* View 360 */}
+        {/* Thông tin hữu ích */}
+        <div className="form-section">
+          <div className="section-header">
+            <h2>📌 Thông tin hữu ích</h2>
+            <button
+              type="button"
+              onClick={addThongTin}
+              className="btn-add-item"
+            >
+              <FaPlus /> Thêm
+            </button>
+          </div>
+
+          {form.thongTin.map((info, i) => (
+            <div key={i} className="dynamic-item">
+              <div className="dynamic-item-fields">
+                <input
+                  type="text"
+                  value={info.tieuDe}
+                  onChange={(e) =>
+                    updateThongTin(i, "tieuDe", e.target.value)
+                  }
+                  placeholder="Tiêu đề"
+                />
+                <input
+                  type="text"
+                  value={info.noiDung}
+                  onChange={(e) =>
+                    updateThongTin(i, "noiDung", e.target.value)
+                  }
+                  placeholder="Nội dung"
+                />
+              </div>
+              <button
+                type="button"
+                onClick={() => removeThongTin(i)}
+                className="btn-remove-item"
+              >
+                <FaTrash />
+              </button>
+            </div>
+          ))}
+
+          {form.thongTin.length === 0 && (
+            <p className="empty-hint">
+              Chưa có thông tin. Nhấn "Thêm" để thêm mới.
+            </p>
+          )}
+        </div>
+
+        {/* View 360 - có thumbnail */}
         <div className="form-section">
           <div className="section-header">
             <h2>🌐 View 360°</h2>
@@ -267,28 +362,44 @@ const AdminPlaceEdit = () => {
           </div>
 
           {form.view360.map((view, i) => (
-            <div key={i} className="dynamic-item">
-              <div className="dynamic-item-fields">
-                <input
-                  type="text"
-                  value={view.tieuDe}
-                  onChange={(e) => updateView360(i, "tieuDe", e.target.value)}
-                  placeholder="Tiêu đề"
-                />
-                <input
-                  type="text"
-                  value={view.link360}
-                  onChange={(e) => updateView360(i, "link360", e.target.value)}
-                  placeholder="Link 360°"
-                />
-              </div>
+            <div key={i} className="spot-card">
               <button
                 type="button"
                 onClick={() => removeView360(i)}
-                className="btn-remove-item"
+                className="spot-card-remove"
               >
                 <FaTrash />
               </button>
+              <div className="spot-card-info">
+                <span className="spot-card-number">{i + 1}</span>
+                <div className="spot-card-fields">
+                  <div className="form-group">
+                    <label>Tiêu đề</label>
+                    <input
+                      type="text"
+                      value={view.tieuDe}
+                      onChange={(e) => updateView360(i, "tieuDe", e.target.value)}
+                      placeholder="VD: Cầu Vàng 360°"
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Link 360°</label>
+                    <input
+                      type="text"
+                      value={view.link360}
+                      onChange={(e) => updateView360(i, "link360", e.target.value)}
+                      placeholder="Link Google Maps embed..."
+                    />
+                  </div>
+                </div>
+              </div>
+              <div className="spot-card-image">
+                <ImageUpload
+                  label="Thumbnail"
+                  value={view.thumbnail}
+                  onChange={(url) => updateView360(i, "thumbnail", url)}
+                />
+              </div>
             </div>
           ))}
 

@@ -29,7 +29,11 @@ exports.getPlaces = async (req, res) => {
 // @route   GET /api/places/:id
 exports.getPlace = async (req, res) => {
   try {
-    const place = await Place.findById(req.params.id);
+    const place = await Place.findById(req.params.id).populate({
+      path: 'tours',
+      match: { hienThi: true, trangThai: 'Hoạt động' },
+      select: 'tenTour moTaNgan giaNguoiLon hinhAnh',
+    });
 
     if (!place) {
       return res.status(404).json({

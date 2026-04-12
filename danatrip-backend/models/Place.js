@@ -28,6 +28,10 @@ const View360Schema = new mongoose.Schema({
 // Main schema: DiaDiem
 const PlaceSchema = new mongoose.Schema(
   {
+    maDiaDiem: {
+      type: String,
+      default: '',
+    },
     tenDiaDiem: {
       type: String,
       required: [true, 'Vui lòng nhập tên địa điểm'],

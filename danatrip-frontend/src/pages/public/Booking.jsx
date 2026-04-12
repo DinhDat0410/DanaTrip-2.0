@@ -90,9 +90,40 @@ const Booking = () => {
         ...form,
       });
 
+      const booking = res.data.data;
+
+      if (form.phuongThucThanhToan === 'Momo') {
+        try {
+          const payRes = await API.post('/payment/create-momo', {
+            bookingId: booking._id,
+          });
+          const payUrl = payRes.data?.payUrl;
+          if (payUrl) {
+            toast.info('Đang chuyển tới cổng thanh toán MoMo...');
+            window.location.href = payUrl;
+            return;
+          }
+          toast.error(payRes.data?.message || 'Không lấy được link thanh toán MoMo');
+        } catch (payErr) {
+          const d = payErr.response?.data;
+          let msg = d?.message || 'Không tạo được thanh toán MoMo';
+          if (Array.isArray(d?.missingEnvVars) && d.missingEnvVars.length) {
+            msg += ` (thiếu: ${d.missingEnvVars.join(', ')})`;
+          }
+          toast.error(msg);
+          try {
+            await API.put(`/bookings/${booking._id}/cancel`);
+            toast.info('Đơn tạm thời đã hủy do không mở được MoMo. Bạn có thể đặt lại.');
+          } catch {
+            toast.error('Không hủy được đơn tự động — vui lòng hủy trong hồ sơ hoặc liên hệ hỗ trợ.');
+          }
+        }
+        return;
+      }
+
       toast.success('Đặt tour thành công!');
       navigate('/booking-success', {
-        state: { booking: res.data.data },
+        state: { booking },
       });
     } catch (error) {
       toast.error(error.response?.data?.message || 'Đặt tour thất bại');

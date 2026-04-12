@@ -5,6 +5,7 @@ import Loading from '../../components/common/Loading';
 import { toast } from 'react-toastify';
 import { FaSave, FaArrowLeft, FaPlus, FaTrash } from 'react-icons/fa';
 import '../../styles/adminForm.css';
+import ImageUpload from '../../components/common/ImageUpload';
 
 const AdminTourEdit = () => {
   const { id } = useParams();
@@ -25,6 +26,7 @@ const AdminTourEdit = () => {
     soCho: 20,
     ngayKhoiHanh: '',
     hienThi: true,
+    hinhAnhChinh: '',
     tags: [],
     highlights: [],
     lichTrinh: [],
@@ -51,6 +53,7 @@ const AdminTourEdit = () => {
             soCho: data.soCho || 20,
             ngayKhoiHanh: data.ngayKhoiHanh ? data.ngayKhoiHanh.split('T')[0] : '',
             hienThi: data.hienThi !== false,
+            hinhAnhChinh: data.hinhAnh?.[0]?.urlAnh || '',
             tags: data.tags || [],
             highlights: data.highlights || [],
             lichTrinh: data.lichTrinh || [],
@@ -143,13 +146,19 @@ const AdminTourEdit = () => {
     e.preventDefault();
     if (!form.tenTour.trim()) return toast.error('Vui lòng nhập tên tour');
 
+    const payload = {
+      ...form,
+      hinhAnh: form.hinhAnhChinh ? [{ urlAnh: form.hinhAnhChinh }] : [],
+    };
+    delete payload.hinhAnhChinh;
+
     setSubmitting(true);
     try {
       if (isEdit) {
-        await API.put(`/tours/${id}`, form);
+        await API.put(`/tours/${id}`, payload);
         toast.success('Cập nhật tour thành công!');
       } else {
-        await API.post('/tours', form);
+        await API.post('/tours', payload);
         toast.success('Thêm tour thành công!');
       }
       navigate('/admin/tours');
@@ -207,6 +216,13 @@ const AdminTourEdit = () => {
             </div>
             <div className="form-group checkbox-group">
               <label><input type="checkbox" name="hienThi" checked={form.hienThi} onChange={handleChange} /> Hiển thị</label>
+            </div>
+            <div className="form-group span-2">
+              <ImageUpload
+                label="Hình ảnh chính"
+                value={form.hinhAnhChinh}
+                onChange={(url) => setForm((prev) => ({ ...prev, hinhAnhChinh: url }))}
+              />
             </div>
           </div>
 

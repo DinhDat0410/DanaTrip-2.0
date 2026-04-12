@@ -4,7 +4,8 @@ const cors = require('cors');
 const path = require('path');
 const connectDB = require('./config/db');
 
-dotenv.config();
+// Luôn đọc .env cạnh server.js (tránh lỗi khi cwd khác thư mục backend)
+dotenv.config({ path: path.join(__dirname, '.env') });
 connectDB();
 
 const app = express();
@@ -27,6 +28,7 @@ app.use('/api/contacts', require('./routes/contact'));
 app.use('/api/chat', require('./routes/chat'));
 app.use('/api/upload', require('./routes/upload'));  // MỚI
 app.use('/api/users', require('./routes/userRoutes'));
+app.use('/api/payment', require('./routes/payment'));
 
 // Health check
 app.get('/', (req, res) => {
