@@ -1,5 +1,6 @@
 const Booking = require('../models/Booking');
 const Tour = require('../models/Tour');
+const { hasMailConfig, sendBookingConfirmationEmail } = require('../utils/mailer');
 
 // @desc    Tạo booking mới (User)
 // @route   POST /api/bookings
@@ -54,6 +55,17 @@ exports.createBooking = async (req, res) => {
     const populatedBooking = await Booking.findById(booking._id)
       .populate('tour', 'tenTour giaNguoiLon giaTreEm ngayKhoiHanh')
       .populate('user', 'hoTen email');
+
+    if (populatedBooking.email) {
+      try {
+        await sendBookingConfirmationEmail(populatedBooking);
+      } catch (mailError) {
+        console.error('Khong gui duoc email xac nhan booking:', mailError.message);
+        if (!hasMailConfig) {
+          console.warn('Email config chua day du. Kiem tra EMAIL_USER va EMAIL_PASS trong .env');
+        }
+      }
+    }
 
     res.status(201).json({ success: true, data: populatedBooking });
   } catch (error) {

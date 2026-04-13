@@ -8,15 +8,15 @@ const {
   deleteFood,
 } = require('../controllers/foodController');
 const { protect } = require('../middleware/auth');
-const { adminOnly } = require('../middleware/admin');
+const { allowRoles } = require('../middleware/admin');
 
 // Public
 router.get('/', getFoods);
 router.get('/:id', getFood);
 
 // Admin
-router.post('/', protect, adminOnly, createFood);
-router.put('/:id', protect, adminOnly, updateFood);
-router.delete('/:id', protect, adminOnly, deleteFood);
+router.post('/', protect, allowRoles('WebsiteManager'), createFood);
+router.put('/:id', protect, allowRoles('WebsiteManager'), updateFood);
+router.delete('/:id', protect, allowRoles('WebsiteManager'), deleteFood);
 
 module.exports = router;

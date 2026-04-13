@@ -5,7 +5,7 @@ import { useState } from 'react';
 import '../../styles/header.css';
 
 const Header = () => {
-  const { user, isAuthenticated, isAdmin, logout } = useAuth();
+  const { user, isAuthenticated, canAccessAdminPanel, logout } = useAuth();
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -33,9 +33,9 @@ const Header = () => {
           <Link to="/reviews" onClick={() => setMenuOpen(false)}>Đánh giá</Link>
           <Link to="/contact" onClick={() => setMenuOpen(false)}>Liên hệ</Link>
 
-          {isAdmin && (
+          {canAccessAdminPanel && (
             <Link to="/admin" className="admin-link" onClick={() => setMenuOpen(false)}>
-              Admin
+              Quản trị
             </Link>
           )}
 

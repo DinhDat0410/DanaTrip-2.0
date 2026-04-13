@@ -33,6 +33,25 @@ const getUsers = async (req, res) => {
   }
 };
 
+// @desc    Lấy danh sách partner để gán tour
+// @route   GET /api/users/partner-options
+// @access  Admin, WebsiteManager
+const getPartnerOptions = async (req, res) => {
+  try {
+    const partners = await User.find({ vaiTro: 'Partner' })
+      .select('hoTen email')
+      .sort({ hoTen: 1 });
+
+    res.json({
+      success: true,
+      count: partners.length,
+      data: partners,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 // @desc    Lấy chi tiết 1 user
 // @route   GET /api/users/:id
 // @access  Admin
@@ -154,4 +173,4 @@ const deleteUser = async (req, res) => {
   }
 };
 
-module.exports = { getUsers, getUser, createUser, updateUser, deleteUser };
+module.exports = { getUsers, getPartnerOptions, getUser, createUser, updateUser, deleteUser };

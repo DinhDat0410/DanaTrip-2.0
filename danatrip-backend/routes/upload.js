@@ -7,7 +7,7 @@ const {
   deleteImage,
 } = require('../controllers/uploadController');
 const { protect } = require('../middleware/auth');
-const { adminOnly } = require('../middleware/admin');
+const { allowRoles } = require('../middleware/admin');
 
 // Middleware xử lý lỗi multer
 const handleMulterError = (uploadFn) => {
@@ -31,12 +31,12 @@ const handleMulterError = (uploadFn) => {
 };
 
 // Upload 1 ảnh (Admin)
-router.post('/', protect, adminOnly, handleMulterError(uploadSingle), uploadImage);
+router.post('/', protect, allowRoles('WebsiteManager', 'Partner'), handleMulterError(uploadSingle), uploadImage);
 
 // Upload nhiều ảnh (Admin)
-router.post('/multiple', protect, adminOnly, handleMulterError(uploadMultiple), uploadMultipleImages);
+router.post('/multiple', protect, allowRoles('WebsiteManager', 'Partner'), handleMulterError(uploadMultiple), uploadMultipleImages);
 
 // Xóa ảnh (Admin)
-router.delete('/:filename', protect, adminOnly, deleteImage);
+router.delete('/:filename', protect, allowRoles('WebsiteManager', 'Partner'), deleteImage);
 
 module.exports = router;

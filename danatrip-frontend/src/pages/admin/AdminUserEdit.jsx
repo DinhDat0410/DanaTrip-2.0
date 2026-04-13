@@ -169,6 +169,8 @@ const AdminUserEdit = () => {
               <select name="vaiTro" value={form.vaiTro} onChange={handleChange}>
                 <option value="User">User</option>
                 <option value="Admin">Admin</option>
+                <option value="WebsiteManager">Website Manager</option>
+                <option value="Partner">Partner</option>
               </select>
             </div>
             <div>

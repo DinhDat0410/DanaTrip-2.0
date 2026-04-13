@@ -3,22 +3,24 @@ const router = express.Router();
 const {
   getTours,
   getTour,
+  getManagedTours,
   createTour,
   updateTour,
   deleteTour,
   getToursByPlace,
 } = require('../controllers/tourController');
 const { protect } = require('../middleware/auth');
-const { adminOnly } = require('../middleware/admin');
+const { allowRoles } = require('../middleware/admin');
 
 // Public
 router.get('/', getTours);
-router.get('/:id', getTour);
 router.get('/place/:placeId', getToursByPlace);
+router.get('/manage/all', protect, allowRoles('WebsiteManager', 'Partner'), getManagedTours);
+router.get('/:id', getTour);
 
-// Admin
-router.post('/', protect, adminOnly, createTour);
-router.put('/:id', protect, adminOnly, updateTour);
-router.delete('/:id', protect, adminOnly, deleteTour);
+// Quản trị tour
+router.post('/', protect, allowRoles('WebsiteManager', 'Partner'), createTour);
+router.put('/:id', protect, allowRoles('WebsiteManager', 'Partner'), updateTour);
+router.delete('/:id', protect, allowRoles('WebsiteManager', 'Partner'), deleteTour);
 
 module.exports = router;

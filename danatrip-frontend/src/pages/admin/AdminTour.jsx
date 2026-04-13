@@ -4,17 +4,20 @@ import API from '../../api/axios';
 import Loading from '../../components/common/Loading';
 import { toast } from 'react-toastify';
 import { FaPlus, FaEdit, FaTrash } from 'react-icons/fa';
+import { useAuth } from '../../hooks/useAuth';
 
 const AdminTours = () => {
+  const { user } = useAuth();
   const [tours, setTours] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const fetchTours = async () => {
     try {
-      const res = await API.get('/tours');
+      const res = await API.get('/tours/manage/all');
       setTours(res.data.data || []);
     } catch (error) {
       console.error(error);
+      toast.error('Không thể tải danh sách tour');
     } finally {
       setLoading(false);
     }
@@ -38,7 +41,7 @@ const AdminTours = () => {
   return (
     <div className="admin-page">
       <div className="admin-page-header">
-        <h1>🗺️ Quản lý Tour</h1>
+        <h1>{user?.vaiTro === 'Partner' ? '🧳 Tour của doanh nghiệp' : '🗺️ Quản lý Tour'}</h1>
         <Link to="/admin/tours/new" className="btn-add">
           <FaPlus /> Thêm tour
         </Link>
@@ -49,6 +52,7 @@ const AdminTours = () => {
           <tr>
             <th>#</th>
             <th>Tên tour</th>
+            <th>Đối tác</th>
             <th>Giá (NL)</th>
             <th>Số chỗ</th>
             <th>Đã đặt</th>
@@ -61,6 +65,7 @@ const AdminTours = () => {
             <tr key={tour._id}>
               <td>{i + 1}</td>
               <td><strong>{tour.tenTour}</strong></td>
+              <td>{tour.partner?.hoTen || 'Chưa gán'}</td>
               <td>{tour.giaNguoiLon?.toLocaleString('vi-VN')}đ</td>
               <td>{tour.soCho}</td>
               <td>{tour.soChoDaDat}</td>
@@ -77,7 +82,7 @@ const AdminTours = () => {
               </td>
             </tr>
           ))}
-          {tours.length === 0 && <tr><td colSpan={7} className="empty">Chưa có tour nào</td></tr>}
+          {tours.length === 0 && <tr><td colSpan={8} className="empty">Chưa có tour nào</td></tr>}
         </tbody>
       </table>
     </div>

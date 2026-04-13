@@ -1,12 +1,16 @@
-const adminOnly = (req, res, next) => {
-  if (req.user && req.user.vaiTro === 'Admin') {
-    next();
-  } else {
+const allowRoles = (...roles) => {
+  return (req, res, next) => {
+    if (req.user && roles.includes(req.user.vaiTro)) {
+      return next();
+    }
+
     return res.status(403).json({
       success: false,
-      message: 'Chỉ Admin mới có quyền truy cập',
+      message: 'Bạn không có quyền truy cập chức năng này',
     });
-  }
+  };
 };
 
-module.exports = { adminOnly };
+const adminOnly = allowRoles('Admin');
+
+module.exports = { adminOnly, allowRoles };

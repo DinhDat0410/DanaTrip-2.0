@@ -10,7 +10,7 @@ const {
   deleteReview,
 } = require('../controllers/reviewController');
 const { protect } = require('../middleware/auth');
-const { adminOnly } = require('../middleware/admin');
+const { allowRoles } = require('../middleware/admin');
 
 // Public
 router.get('/tour/:tourId', getReviewsByTour);
@@ -23,6 +23,6 @@ router.put('/:id', protect, updateReview);
 router.delete('/:id', protect, deleteReview);
 
 // Admin
-router.get('/', protect, adminOnly, getAllReviews);
+router.get('/', protect, allowRoles('WebsiteManager'), getAllReviews);
 
 module.exports = router;

@@ -7,7 +7,7 @@ const {
   deleteChatHistory,
 } = require('../controllers/chatController');
 const { protect } = require('../middleware/auth');
-const { adminOnly } = require('../middleware/admin');
+const { allowRoles } = require('../middleware/admin');
 
 // Public (chat không cần đăng nhập)
 router.post('/', sendMessage);
@@ -17,6 +17,6 @@ router.get('/:sessionId', getChatHistory);
 router.get('/user/sessions', protect, getMySessions);
 
 // Admin
-router.delete('/:sessionId', protect, adminOnly, deleteChatHistory);
+router.delete('/:sessionId', protect, allowRoles('WebsiteManager'), deleteChatHistory);
 
 module.exports = router;

@@ -9,7 +9,7 @@ const {
   cancelBooking,
 } = require('../controllers/bookingController');
 const { protect } = require('../middleware/auth');
-const { adminOnly } = require('../middleware/admin');
+const { allowRoles } = require('../middleware/admin');
 
 // User (cần đăng nhập)
 router.post('/', protect, createBooking);
@@ -18,7 +18,7 @@ router.get('/:id', protect, getBooking);
 router.put('/:id/cancel', protect, cancelBooking);
 
 // Admin
-router.get('/', protect, adminOnly, getAllBookings);
-router.put('/:id', protect, adminOnly, updateBooking);
+router.get('/', protect, allowRoles('WebsiteManager'), getAllBookings);
+router.put('/:id', protect, allowRoles('WebsiteManager'), updateBooking);
 
 module.exports = router;

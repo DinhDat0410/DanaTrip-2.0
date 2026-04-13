@@ -4,6 +4,7 @@ import API from '../api/axios';
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
+  const adminPanelRoles = ['Admin', 'WebsiteManager', 'Partner'];
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(localStorage.getItem('token') || null);
   const [loading, setLoading] = useState(true);
@@ -87,6 +88,9 @@ export const AuthProvider = ({ children }) => {
         socialLogin,
         isAuthenticated: !!token,
         isAdmin: user?.vaiTro === 'Admin',
+        isWebsiteManager: user?.vaiTro === 'WebsiteManager',
+        isPartner: user?.vaiTro === 'Partner',
+        canAccessAdminPanel: adminPanelRoles.includes(user?.vaiTro),
       }}
     >
       {children}

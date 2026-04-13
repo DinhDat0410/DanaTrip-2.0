@@ -6,15 +6,19 @@ import { toast } from 'react-toastify';
 import { FaSave, FaArrowLeft, FaPlus, FaTrash } from 'react-icons/fa';
 import '../../styles/adminForm.css';
 import ImageUpload from '../../components/common/ImageUpload';
+import { useAuth } from '../../hooks/useAuth';
 
 const AdminTourEdit = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const isEdit = !!id;
+  const { user } = useAuth();
+  const isWebsiteManager = user?.vaiTro === 'WebsiteManager';
 
   const [loading, setLoading] = useState(isEdit);
   const [submitting, setSubmitting] = useState(false);
   const [places, setPlaces] = useState([]);
+  const [partners, setPartners] = useState([]);
 
   const [form, setForm] = useState({
     tenTour: '',
@@ -26,6 +30,7 @@ const AdminTourEdit = () => {
     soCho: 20,
     ngayKhoiHanh: '',
     hienThi: true,
+    partner: '',
     hinhAnhChinh: '',
     tags: [],
     highlights: [],
@@ -40,6 +45,11 @@ const AdminTourEdit = () => {
         const placesRes = await API.get('/places');
         setPlaces(placesRes.data.data || []);
 
+        if (isWebsiteManager) {
+          const partnerRes = await API.get('/users/partner-options');
+          setPartners(partnerRes.data.data || []);
+        }
+
         if (isEdit) {
           const tourRes = await API.get(`/tours/${id}`);
           const data = tourRes.data.data;
@@ -53,6 +63,7 @@ const AdminTourEdit = () => {
             soCho: data.soCho || 20,
             ngayKhoiHanh: data.ngayKhoiHanh ? data.ngayKhoiHanh.split('T')[0] : '',
             hienThi: data.hienThi !== false,
+            partner: data.partner?._id || data.partner || '',
             hinhAnhChinh: data.hinhAnh?.[0]?.urlAnh || '',
             tags: data.tags || [],
             highlights: data.highlights || [],
@@ -68,7 +79,7 @@ const AdminTourEdit = () => {
       }
     };
     fetchData();
-  }, [id, isEdit, navigate]);
+  }, [id, isEdit, isWebsiteManager, navigate]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -152,6 +163,10 @@ const AdminTourEdit = () => {
     };
     delete payload.hinhAnhChinh;
 
+    if (!isWebsiteManager) {
+      delete payload.partner;
+    }
+
     setSubmitting(true);
     try {
       if (isEdit) {
@@ -202,6 +217,19 @@ const AdminTourEdit = () => {
               <label>Ngày khởi hành</label>
               <input type="date" name="ngayKhoiHanh" value={form.ngayKhoiHanh} onChange={handleChange} />
             </div>
+            {isWebsiteManager && (
+              <div className="form-group">
+                <label>Đối tác sở hữu</label>
+                <select name="partner" value={form.partner} onChange={handleChange}>
+                  <option value="">-- Chưa gán đối tác --</option>
+                  {partners.map((partner) => (
+                    <option key={partner._id} value={partner._id}>
+                      {partner.hoTen} - {partner.email}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
             <div className="form-group">
               <label>Giá người lớn *</label>
               <input type="number" name="giaNguoiLon" value={form.giaNguoiLon} onChange={handleChange} min="0" />

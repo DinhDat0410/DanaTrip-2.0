@@ -1,5 +1,6 @@
 const User = require('../models/User');
 const crypto = require('crypto');
+const { hasMailConfig, sendResetPasswordEmail } = require('../utils/mailer');
 
 // @desc    Đăng ký
 // @route   POST /api/auth/register
@@ -164,6 +165,118 @@ exports.socialLogin = async (req, res) => {
         vaiTro: user.vaiTro,
         avatar: user.avatar,
       },
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Lỗi server',
+      error: error.message,
+    });
+  }
+};
+
+// @desc    Gửi email quên mật khẩu
+// @route   POST /api/auth/forgot-password
+exports.forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: 'Vui lòng nhập email',
+      });
+    }
+
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(200).json({
+        success: true,
+        message: 'Nếu email tồn tại trong hệ thống, chúng tôi đã gửi link đặt lại mật khẩu',
+      });
+    }
+
+    const resetToken = user.getResetPasswordToken();
+    await user.save({ validateBeforeSave: false });
+
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+    const resetUrl = `${frontendUrl}/reset-password/${resetToken}`;
+
+    try {
+      await sendResetPasswordEmail({
+        email: user.email,
+        hoTen: user.hoTen,
+        resetUrl,
+      });
+
+      return res.status(200).json({
+        success: true,
+        message: 'Nếu email tồn tại trong hệ thống, chúng tôi đã gửi link đặt lại mật khẩu',
+      });
+    } catch (mailError) {
+      user.resetPasswordToken = null;
+      user.resetPasswordExpire = null;
+      await user.save({ validateBeforeSave: false });
+
+      console.error('Khong gui duoc email reset password:', mailError.message);
+      if (!hasMailConfig) {
+        console.warn('Email config chua day du. Kiem tra EMAIL_USER va EMAIL_PASS trong .env');
+      }
+
+      return res.status(500).json({
+        success: false,
+        message: 'Không gửi được email đặt lại mật khẩu',
+      });
+    }
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Lỗi server',
+      error: error.message,
+    });
+  }
+};
+
+// @desc    Đặt lại mật khẩu
+// @route   PUT /api/auth/reset-password/:token
+exports.resetPassword = async (req, res) => {
+  try {
+    const { token } = req.params;
+    const { matKhau } = req.body;
+
+    if (!matKhau || String(matKhau).length < 6) {
+      return res.status(400).json({
+        success: false,
+        message: 'Mật khẩu mới phải có ít nhất 6 ký tự',
+      });
+    }
+
+    const resetPasswordToken = crypto
+      .createHash('sha256')
+      .update(token)
+      .digest('hex');
+
+    const user = await User.findOne({
+      resetPasswordToken,
+      resetPasswordExpire: { $gt: Date.now() },
+    }).select('+resetPasswordToken +resetPasswordExpire +matKhau');
+
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        message: 'Link đặt lại mật khẩu không hợp lệ hoặc đã hết hạn',
+      });
+    }
+
+    user.matKhau = matKhau;
+    user.resetPasswordToken = null;
+    user.resetPasswordExpire = null;
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Đặt lại mật khẩu thành công',
     });
   } catch (error) {
     res.status(500).json({

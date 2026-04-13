@@ -7,6 +7,13 @@ import { FaPlus, FaEdit, FaTrash, FaSearch, FaUsers } from 'react-icons/fa';
 import '../../styles/admin.css';
 
 const AdminUser = () => {
+  const getRoleBadgeClass = (role) => {
+    if (role === 'Admin') return 'badge-admin';
+    if (role === 'WebsiteManager') return 'badge-active';
+    if (role === 'Partner') return 'done';
+    return 'badge-user';
+  };
+
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -106,7 +113,7 @@ const AdminUser = () => {
               <td><strong>{user.hoTen}</strong></td>
               <td>{user.email}</td>
               <td>
-                <span className={`badge ${user.vaiTro === 'Admin' ? 'badge-admin' : 'badge-user'}`}>
+                <span className={`badge ${getRoleBadgeClass(user.vaiTro)}`}>
                   {user.vaiTro}
                 </span>
               </td>

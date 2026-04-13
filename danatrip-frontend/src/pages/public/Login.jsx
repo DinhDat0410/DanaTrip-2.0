@@ -7,6 +7,8 @@ import { auth, googleProvider } from '../../config/firebase';
 import { FaGoogle } from 'react-icons/fa';
 import '../../styles/auth.css';
 
+const ADMIN_PANEL_ROLES = ['Admin', 'WebsiteManager', 'Partner'];
+
 const Login = () => {
   const [email, setEmail] = useState('');
   const [matKhau, setMatKhau] = useState('');
@@ -22,7 +24,7 @@ const Login = () => {
       const user = await login(email, matKhau);
       toast.success(`Xin chào, ${user.hoTen}!`);
 
-      if (user.vaiTro === 'Admin') {
+      if (ADMIN_PANEL_ROLES.includes(user.vaiTro)) {
         navigate('/admin');
       } else {
         navigate('/');
@@ -45,7 +47,7 @@ const Login = () => {
         'google'
       );
       toast.success(`Xin chào, ${user.hoTen}!`);
-      navigate(user.vaiTro === 'Admin' ? '/admin' : '/');
+      navigate(ADMIN_PANEL_ROLES.includes(user.vaiTro) ? '/admin' : '/');
     } catch (error) {
       const msg = error.code === 'auth/popup-closed-by-user'
         ? 'Đăng nhập bị hủy'
@@ -83,6 +85,12 @@ const Login = () => {
               placeholder="Nhập mật khẩu"
               required
             />
+          </div>
+
+          <div className="auth-actions">
+            <Link to="/forgot-password" className="auth-link">
+              Quên mật khẩu?
+            </Link>
           </div>
 
           <button type="submit" className="btn-primary" disabled={loading}>

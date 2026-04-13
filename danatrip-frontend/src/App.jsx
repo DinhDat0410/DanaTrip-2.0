@@ -7,6 +7,7 @@ import { AuthProvider } from './context/AuthContext';
 import Layout from './components/layout/Layout';
 import AdminLayout from './components/layout/AdminLayout';
 import ProtectedRoute from './components/common/ProtectedRoute';
+import AdminHomeRedirect from './components/common/AdminHomeRedirect';
 import ChatWidget from './components/chat/ChatWidget';
 
 // Public Pages
@@ -24,6 +25,8 @@ import VNPayPaymentReturn from './pages/public/VNPayPaymentReturn';
 import Contact from './pages/public/Contact';
 import Login from './pages/public/Login';
 import Register from './pages/public/Register';
+import ForgotPassword from './pages/public/ForgotPassword';
+import ResetPassword from './pages/public/ResetPassword';
 import Profile from './pages/public/Profile';
 import Reviews from './pages/public/Reviews';
 
@@ -60,6 +63,8 @@ function App() {
             <Route path="reviews" element={<Reviews />} />
             <Route path="login" element={<Login />} />
             <Route path="register" element={<Register />} />
+            <Route path="forgot-password" element={<ForgotPassword />} />
+            <Route path="reset-password/:token" element={<ResetPassword />} />
             <Route path="booking/:tourId" element={<ProtectedRoute><Booking /></ProtectedRoute>} />
             <Route path="booking-success" element={<ProtectedRoute><BookingSuccess /></ProtectedRoute>} />
             <Route path="payment/momo-return" element={<MomoPaymentReturn />} />
@@ -68,23 +73,24 @@ function App() {
           </Route>
 
           {/* Admin */}
-          <Route path="/admin" element={<ProtectedRoute adminOnly><AdminLayout /></ProtectedRoute>}>
-            <Route index element={<Dashboard />} />
-            <Route path="places" element={<AdminPlaces />} />
-            <Route path="places/new" element={<AdminPlaceEdit />} />
-            <Route path="places/edit/:id" element={<AdminPlaceEdit />} />
-            <Route path="tours" element={<AdminTours />} />
-            <Route path="tours/new" element={<AdminTourEdit />} />
-            <Route path="tours/edit/:id" element={<AdminTourEdit />} />
-            <Route path="foods" element={<AdminFoods />} />
-            <Route path="foods/new" element={<AdminFoodEdit />} />
-            <Route path="foods/edit/:id" element={<AdminFoodEdit />} />
-            <Route path="bookings" element={<AdminBookings />} />
-            <Route path="reviews" element={<AdminReviews />} />
-            <Route path="contacts" element={<AdminContacts />} />
-            <Route path="users" element={<AdminUsers />} />
-            <Route path="users/new" element={<AdminUserEdit />} />
-            <Route path="users/edit/:id" element={<AdminUserEdit />} />
+          <Route path="/admin" element={<ProtectedRoute allowedRoles={['Admin', 'WebsiteManager', 'Partner']}><AdminLayout /></ProtectedRoute>}>
+            <Route index element={<AdminHomeRedirect />} />
+            <Route path="dashboard" element={<ProtectedRoute allowedRoles={['WebsiteManager']}><Dashboard /></ProtectedRoute>} />
+            <Route path="places" element={<ProtectedRoute allowedRoles={['WebsiteManager']}><AdminPlaces /></ProtectedRoute>} />
+            <Route path="places/new" element={<ProtectedRoute allowedRoles={['WebsiteManager']}><AdminPlaceEdit /></ProtectedRoute>} />
+            <Route path="places/edit/:id" element={<ProtectedRoute allowedRoles={['WebsiteManager']}><AdminPlaceEdit /></ProtectedRoute>} />
+            <Route path="tours" element={<ProtectedRoute allowedRoles={['WebsiteManager', 'Partner']}><AdminTours /></ProtectedRoute>} />
+            <Route path="tours/new" element={<ProtectedRoute allowedRoles={['WebsiteManager', 'Partner']}><AdminTourEdit /></ProtectedRoute>} />
+            <Route path="tours/edit/:id" element={<ProtectedRoute allowedRoles={['WebsiteManager', 'Partner']}><AdminTourEdit /></ProtectedRoute>} />
+            <Route path="foods" element={<ProtectedRoute allowedRoles={['WebsiteManager']}><AdminFoods /></ProtectedRoute>} />
+            <Route path="foods/new" element={<ProtectedRoute allowedRoles={['WebsiteManager']}><AdminFoodEdit /></ProtectedRoute>} />
+            <Route path="foods/edit/:id" element={<ProtectedRoute allowedRoles={['WebsiteManager']}><AdminFoodEdit /></ProtectedRoute>} />
+            <Route path="bookings" element={<ProtectedRoute allowedRoles={['WebsiteManager']}><AdminBookings /></ProtectedRoute>} />
+            <Route path="reviews" element={<ProtectedRoute allowedRoles={['WebsiteManager']}><AdminReviews /></ProtectedRoute>} />
+            <Route path="contacts" element={<ProtectedRoute allowedRoles={['WebsiteManager']}><AdminContacts /></ProtectedRoute>} />
+            <Route path="users" element={<ProtectedRoute allowedRoles={['Admin']}><AdminUsers /></ProtectedRoute>} />
+            <Route path="users/new" element={<ProtectedRoute allowedRoles={['Admin']}><AdminUserEdit /></ProtectedRoute>} />
+            <Route path="users/edit/:id" element={<ProtectedRoute allowedRoles={['Admin']}><AdminUserEdit /></ProtectedRoute>} />
           </Route>
         </Routes>
         <ChatWidget />

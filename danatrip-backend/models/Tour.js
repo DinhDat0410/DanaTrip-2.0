@@ -30,6 +30,11 @@ const TourSchema = new mongoose.Schema(
       ref: 'Place',
       required: [true, 'Tour phải thuộc một địa điểm'],
     },
+    partner: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      default: null,
+    },
     tenTour: {
       type: String,
       required: [true, 'Vui lòng nhập tên tour'],

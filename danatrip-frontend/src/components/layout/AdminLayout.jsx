@@ -19,19 +19,27 @@ const AdminLayout = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const menuItems = [
-    { path: '/admin', icon: <FaChartBar />, label: 'Dashboard', exact: true },
-    { path: '/admin/places', icon: <FaMapMarkerAlt />, label: 'Địa điểm' },
-    { path: '/admin/tours', icon: <FaRoute />, label: 'Tour' },
-    { path: '/admin/foods', icon: <FaUtensils />, label: 'Ẩm thực' },
-    { path: '/admin/bookings', icon: <FaCalendarCheck />, label: 'Booking' },
-    { path: '/admin/reviews', icon: <FaStar />, label: 'Đánh giá' },
-    { path: '/admin/contacts', icon: <FaEnvelope />, label: 'Liên hệ' },
-    { path: '/admin/users', icon: <FaUsers />, label: 'Người dùng' },
-  ];
+  const menuByRole = {
+    Admin: [
+      { path: '/admin/users', icon: <FaUsers />, label: 'Người dùng' },
+    ],
+    WebsiteManager: [
+      { path: '/admin/dashboard', icon: <FaChartBar />, label: 'Dashboard' },
+      { path: '/admin/places', icon: <FaMapMarkerAlt />, label: 'Địa điểm' },
+      { path: '/admin/tours', icon: <FaRoute />, label: 'Tour' },
+      { path: '/admin/foods', icon: <FaUtensils />, label: 'Ẩm thực' },
+      { path: '/admin/bookings', icon: <FaCalendarCheck />, label: 'Booking' },
+      { path: '/admin/reviews', icon: <FaStar />, label: 'Đánh giá' },
+      { path: '/admin/contacts', icon: <FaEnvelope />, label: 'Liên hệ' },
+    ],
+    Partner: [
+      { path: '/admin/tours', icon: <FaRoute />, label: 'Tour doanh nghiệp' },
+    ],
+  };
+
+  const menuItems = menuByRole[user?.vaiTro] || [];
 
   const isActive = (item) => {
-    if (item.exact) return location.pathname === item.path;
     return location.pathname.startsWith(item.path);
   };
 
@@ -46,7 +54,7 @@ const AdminLayout = () => {
       <aside className="admin-sidebar">
         <div className="sidebar-header">
           <h2>🏖️ DANATrip</h2>
-          <span>Admin Panel</span>
+          <span>{user?.vaiTro || 'Control Panel'}</span>
         </div>
 
         <nav className="sidebar-nav">

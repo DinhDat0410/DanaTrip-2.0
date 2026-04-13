@@ -8,15 +8,15 @@ const {
   deletePlace,
 } = require('../controllers/placeController');
 const { protect } = require('../middleware/auth');
-const { adminOnly } = require('../middleware/admin');
+const { allowRoles } = require('../middleware/admin');
 
 // Public routes
 router.get('/', getPlaces);
 router.get('/:id', getPlace);
 
 // Admin routes
-router.post('/', protect, adminOnly, createPlace);
-router.put('/:id', protect, adminOnly, updatePlace);
-router.delete('/:id', protect, adminOnly, deletePlace);
+router.post('/', protect, allowRoles('WebsiteManager'), createPlace);
+router.put('/:id', protect, allowRoles('WebsiteManager'), updatePlace);
+router.delete('/:id', protect, allowRoles('WebsiteManager'), deletePlace);
 
 module.exports = router;
