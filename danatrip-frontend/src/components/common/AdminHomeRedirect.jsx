@@ -9,7 +9,7 @@ const AdminHomeRedirect = () => {
   }
 
   if (user?.vaiTro === 'Partner') {
-    return <Navigate to="/admin/tours" replace />;
+    return <Navigate to="/admin/dashboard" replace />;
   }
 
   return <Navigate to="/admin/dashboard" replace />;

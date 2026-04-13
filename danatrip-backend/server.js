@@ -29,6 +29,8 @@ app.use('/api/chat', require('./routes/chat'));
 app.use('/api/upload', require('./routes/upload'));  // MỚI
 app.use('/api/users', require('./routes/userRoutes'));
 app.use('/api/payment', require('./routes/payment'));
+app.use('/api/dashboard', require('./routes/dashboard'));
+app.use('/api/analytics', require('./routes/analytics'));
 
 // Health check
 app.get('/', (req, res) => {
@@ -45,6 +47,8 @@ app.get('/', (req, res) => {
       contacts: '/api/contacts',
       chat: '/api/chat',
       upload: '/api/upload',
+      dashboard: '/api/dashboard',
+      analytics: '/api/analytics',
     },
   });
 });

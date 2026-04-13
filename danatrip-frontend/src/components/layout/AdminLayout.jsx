@@ -33,6 +33,7 @@ const AdminLayout = () => {
       { path: '/admin/contacts', icon: <FaEnvelope />, label: 'Liên hệ' },
     ],
     Partner: [
+      { path: '/admin/dashboard', icon: <FaChartBar />, label: 'Dashboard' },
       { path: '/admin/tours', icon: <FaRoute />, label: 'Tour doanh nghiệp' },
     ],
   };

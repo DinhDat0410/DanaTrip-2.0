@@ -8,6 +8,7 @@ import Layout from './components/layout/Layout';
 import AdminLayout from './components/layout/AdminLayout';
 import ProtectedRoute from './components/common/ProtectedRoute';
 import AdminHomeRedirect from './components/common/AdminHomeRedirect';
+import VisitTracker from './components/common/VisitTracker';
 import ChatWidget from './components/chat/ChatWidget';
 
 // Public Pages
@@ -48,6 +49,7 @@ function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
+        <VisitTracker />
         <ToastContainer position="top-right" autoClose={3000} />
         <Routes>
           {/* Public */}
@@ -75,7 +77,7 @@ function App() {
           {/* Admin */}
           <Route path="/admin" element={<ProtectedRoute allowedRoles={['Admin', 'WebsiteManager', 'Partner']}><AdminLayout /></ProtectedRoute>}>
             <Route index element={<AdminHomeRedirect />} />
-            <Route path="dashboard" element={<ProtectedRoute allowedRoles={['WebsiteManager']}><Dashboard /></ProtectedRoute>} />
+            <Route path="dashboard" element={<ProtectedRoute allowedRoles={['WebsiteManager', 'Partner']}><Dashboard /></ProtectedRoute>} />
             <Route path="places" element={<ProtectedRoute allowedRoles={['WebsiteManager']}><AdminPlaces /></ProtectedRoute>} />
             <Route path="places/new" element={<ProtectedRoute allowedRoles={['WebsiteManager']}><AdminPlaceEdit /></ProtectedRoute>} />
             <Route path="places/edit/:id" element={<ProtectedRoute allowedRoles={['WebsiteManager']}><AdminPlaceEdit /></ProtectedRoute>} />
