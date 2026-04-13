@@ -1,11 +1,125 @@
 const axios = require('axios');
 const crypto = require('crypto');
 const Booking = require('../models/Booking');
+const Tour = require('../models/Tour');
+
+const SUCCESS_RESULT_CODES = new Set(['0', '9000']);
 
 function parseBookingIdFromOrderId(orderId) {
   if (!orderId || typeof orderId !== 'string' || !orderId.startsWith('booking')) return null;
   const rest = orderId.slice(7).split('_')[0];
   return /^[a-f\d]{24}$/i.test(rest) ? rest : null;
+}
+
+function normalizeResultCode(resultCode) {
+  return String(resultCode ?? '');
+}
+
+function buildMomoRawSignature(body, accessKey) {
+  return (
+    'accessKey=' + accessKey +
+    '&amount=' + body.amount +
+    '&extraData=' + (body.extraData || '') +
+    '&message=' + body.message +
+    '&orderId=' + body.orderId +
+    '&orderInfo=' + body.orderInfo +
+    '&orderType=' + body.orderType +
+    '&partnerCode=' + body.partnerCode +
+    '&payType=' + body.payType +
+    '&requestId=' + body.requestId +
+    '&responseTime=' + body.responseTime +
+    '&resultCode=' + body.resultCode +
+    '&transId=' + body.transId
+  );
+}
+
+function verifyMomoSignature(body) {
+  const secretKey = process.env.MOMO_SECRET_KEY;
+  const accessKey = process.env.MOMO_ACCESS_KEY;
+
+  if (!body?.signature || !secretKey || !accessKey) {
+    return false;
+  }
+
+  const expectedSig = crypto
+    .createHmac('sha256', secretKey)
+    .update(buildMomoRawSignature(body, accessKey))
+    .digest('hex');
+
+  return expectedSig === body.signature;
+}
+
+async function releaseSeatsForBooking(booking) {
+  const tour = await Tour.findById(booking.tour);
+  if (!tour) return;
+
+  tour.soChoDaDat -= booking.soNguoiLon + booking.soTreEm;
+  if (tour.soChoDaDat < 0) tour.soChoDaDat = 0;
+  await tour.save();
+}
+
+async function syncBookingPaymentStatus(payload) {
+  const bookingId = parseBookingIdFromOrderId(payload.orderId);
+  if (!bookingId) {
+    return { success: false, status: 400, message: 'orderId không hợp lệ' };
+  }
+
+  const booking = await Booking.findById(bookingId);
+  if (!booking) {
+    return { success: false, status: 404, message: 'Không tìm thấy booking' };
+  }
+
+  if (booking.phuongThucThanhToan !== 'Momo') {
+    return { success: false, status: 400, message: 'Booking không dùng MoMo' };
+  }
+
+  if (booking.momoOrderId && booking.momoOrderId !== payload.orderId) {
+    return { success: false, status: 409, message: 'orderId không khớp với booking' };
+  }
+
+  if (String(booking.tongTien) !== String(payload.amount)) {
+    return { success: false, status: 400, message: 'Số tiền không khớp booking' };
+  }
+
+  const resultCode = normalizeResultCode(payload.resultCode);
+  const isSuccess = SUCCESS_RESULT_CODES.has(resultCode);
+  let changed = false;
+
+  booking.momoOrderId = payload.orderId || booking.momoOrderId;
+  booking.momoRequestId = payload.requestId || booking.momoRequestId;
+  booking.momoTransId = String(payload.transId || booking.momoTransId || '');
+  booking.paymentResultCode = resultCode;
+  booking.paymentUpdatedAt = new Date();
+
+  if (isSuccess) {
+    if (booking.trangThai !== 'Đã thanh toán' && booking.trangThai !== 'Đã hủy') {
+      booking.trangThai = 'Đã thanh toán';
+      changed = true;
+    }
+  } else if (booking.trangThai !== 'Đã hủy' && booking.trangThai !== 'Đã thanh toán') {
+    await releaseSeatsForBooking(booking);
+    booking.trangThai = 'Đã hủy';
+    changed = true;
+  }
+
+  await booking.save();
+
+  const finalStatusMessage =
+    booking.trangThai === 'Đã thanh toán'
+      ? 'Booking đang ở trạng thái Đã thanh toán'
+      : booking.trangThai === 'Đã hủy'
+        ? 'Booking đang ở trạng thái Đã hủy'
+        : `Booking đang ở trạng thái ${booking.trangThai}`;
+
+  return {
+    success: true,
+    status: 200,
+    changed,
+    booking,
+    message: changed
+      ? finalStatusMessage.replace('đang ở', 'đã được cập nhật sang')
+      : finalStatusMessage,
+  };
 }
 
 exports.createMomoPayment = async (req, res) => {
@@ -93,6 +207,13 @@ exports.createMomoPayment = async (req, res) => {
     const data = response.data;
 
     if (data && data.resultCode === 0 && data.payUrl) {
+      booking.momoOrderId = orderId;
+      booking.momoRequestId = requestId;
+      booking.paymentResultCode = '';
+      booking.momoTransId = '';
+      booking.paymentUpdatedAt = null;
+      await booking.save();
+
       return res.json({ payUrl: data.payUrl, orderId });
     }
 
@@ -109,52 +230,41 @@ exports.createMomoPayment = async (req, res) => {
 exports.handleMomoIPN = async (req, res) => {
   try {
     const body = req.body;
-    const secretKey = process.env.MOMO_SECRET_KEY;
-    const accessKey = process.env.MOMO_ACCESS_KEY;
-
-    if (!body?.signature || !secretKey || !accessKey) {
+    if (!verifyMomoSignature(body)) {
       return res.status(400).end();
     }
 
-    const rawSignature =
-      'accessKey=' + accessKey +
-      '&amount=' + body.amount +
-      '&extraData=' + (body.extraData || '') +
-      '&message=' + body.message +
-      '&orderId=' + body.orderId +
-      '&orderInfo=' + body.orderInfo +
-      '&orderType=' + body.orderType +
-      '&partnerCode=' + body.partnerCode +
-      '&payType=' + body.payType +
-      '&requestId=' + body.requestId +
-      '&responseTime=' + body.responseTime +
-      '&resultCode=' + body.resultCode +
-      '&transId=' + body.transId;
-
-    const expectedSig = crypto
-      .createHmac('sha256', secretKey)
-      .update(rawSignature)
-      .digest('hex');
-
-    if (expectedSig !== body.signature) {
-      return res.status(400).end();
-    }
-
-    const bookingId = parseBookingIdFromOrderId(body.orderId);
-    if (bookingId && (body.resultCode === 0 || body.resultCode === 9000)) {
-      const booking = await Booking.findById(bookingId);
-      if (
-        booking &&
-        String(booking.tongTien) === String(body.amount)
-      ) {
-        booking.trangThai = 'Đã thanh toán';
-        await booking.save();
-      }
-    }
+    await syncBookingPaymentStatus(body);
 
     return res.status(204).end();
   } catch (error) {
     console.error('MoMo IPN:', error);
     return res.status(500).end();
+  }
+};
+
+exports.syncMomoReturn = async (req, res) => {
+  try {
+    const payload = req.body || {};
+
+    if (!verifyMomoSignature(payload)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Dữ liệu trả về từ MoMo không hợp lệ',
+      });
+    }
+
+    const result = await syncBookingPaymentStatus(payload);
+    return res.status(result.status).json({
+      success: result.success,
+      message: result.message,
+      data: result.booking,
+    });
+  } catch (error) {
+    console.error('MoMo return sync:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Không thể đồng bộ trạng thái thanh toán MoMo',
+    });
   }
 };

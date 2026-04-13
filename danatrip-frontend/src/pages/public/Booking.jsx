@@ -121,6 +121,35 @@ const Booking = () => {
         return;
       }
 
+      if (form.phuongThucThanhToan === 'VNPay') {
+        try {
+          const payRes = await API.post('/payment/create-vnpay', {
+            bookingId: booking._id,
+          });
+          const payUrl = payRes.data?.payUrl;
+          if (payUrl) {
+            toast.info('Đang chuyển tới cổng thanh toán VNPay...');
+            window.location.href = payUrl;
+            return;
+          }
+          toast.error(payRes.data?.message || 'Không lấy được link thanh toán VNPay');
+        } catch (payErr) {
+          const d = payErr.response?.data;
+          let msg = d?.message || 'Không tạo được thanh toán VNPay';
+          if (Array.isArray(d?.missingEnvVars) && d.missingEnvVars.length) {
+            msg += ` (thiếu: ${d.missingEnvVars.join(', ')})`;
+          }
+          toast.error(msg);
+          try {
+            await API.put(`/bookings/${booking._id}/cancel`);
+            toast.info('Đơn tạm thời đã hủy do không mở được VNPay. Bạn có thể đặt lại.');
+          } catch {
+            toast.error('Không hủy được đơn tự động — vui lòng hủy trong hồ sơ hoặc liên hệ hỗ trợ.');
+          }
+        }
+        return;
+      }
+
       toast.success('Đặt tour thành công!');
       navigate('/booking-success', {
         state: { booking },
@@ -213,9 +242,8 @@ const Booking = () => {
                 {[
                   { value: 'Cash', label: '💵 Tiền mặt' },
                   { value: 'Momo', label: '🟣 Momo' },
-                  { value: 'ZaloPay', label: '🔵 ZaloPay' },
-                  { value: 'VNPay', label: '🔴 VNPay' },
-                  { value: 'BankTransfer', label: '🏦 Chuyển khoản' },
+                  //{ value: 'VNPay', label: '🔴 VNPay' },
+                  //{ value: 'BankTransfer', label: '🏦 Chuyển khoản' },
                 ].map((method) => (
                   <label key={method.value} className="payment-option">
                     <input

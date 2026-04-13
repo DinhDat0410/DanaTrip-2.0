@@ -22,6 +22,13 @@ const BookingSchema = new mongoose.Schema(
       enum: ['Cash', 'Momo', 'ZaloPay', 'VNPay', 'BankTransfer'],
       default: 'Cash',
     },
+    momoOrderId: { type: String, default: '' },
+    momoRequestId: { type: String, default: '' },
+    momoTransId: { type: String, default: '' },
+    vnpTxnRef: { type: String, default: '' },
+    vnpTransactionNo: { type: String, default: '' },
+    paymentResultCode: { type: String, default: '' },
+    paymentUpdatedAt: { type: Date, default: null },
     trangThai: {
       type: String,
       enum: ['Chờ xác nhận', 'Đã xác nhận', 'Đã thanh toán', 'Đã hủy'],

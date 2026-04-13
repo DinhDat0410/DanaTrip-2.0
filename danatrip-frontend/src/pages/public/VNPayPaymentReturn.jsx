@@ -4,11 +4,7 @@ import { FaCheckCircle, FaExclamationTriangle } from 'react-icons/fa';
 import API from '../../api/axios';
 import '../../styles/momoReturn.css';
 
-/**
- * MoMo redirectUrl (GET): thêm query resultCode, orderId, message, amount, ...
- * Trạng thái đơn chính xác do IPN cập nhật; trang này chỉ để báo cho người dùng.
- */
-const MomoPaymentReturn = () => {
+const VNPayPaymentReturn = () => {
   const [searchParams] = useSearchParams();
   const [syncMessage, setSyncMessage] = useState('');
 
@@ -17,27 +13,35 @@ const MomoPaymentReturn = () => {
     [searchParams]
   );
 
-  const { ok, resultCode, message, orderId, amount } = useMemo(() => {
-    const code = Number(searchParams.get('resultCode'));
-    const success = code === 0 || code === 9000;
+  const {
+    ok,
+    responseCode,
+    transactionStatus,
+    message,
+    txnRef,
+    amount,
+  } = useMemo(() => {
+    const code = searchParams.get('vnp_ResponseCode') || '';
+    const status = searchParams.get('vnp_TransactionStatus') || '';
     return {
-      ok: success,
-      resultCode: searchParams.get('resultCode'),
-      message: searchParams.get('message') || '',
-      orderId: searchParams.get('orderId') || '',
-      amount: searchParams.get('amount') || '',
+      ok: code === '00' && (!status || status === '00'),
+      responseCode: code,
+      transactionStatus: status,
+      message: searchParams.get('vnp_OrderInfo') || '',
+      txnRef: searchParams.get('vnp_TxnRef') || '',
+      amount: searchParams.get('vnp_Amount') || '',
     };
   }, [searchParams]);
 
   useEffect(() => {
-    const shouldSync = orderId && resultCode !== null;
+    const shouldSync = txnRef && responseCode;
     if (!shouldSync) return undefined;
 
     let isMounted = true;
 
     const syncBookingStatus = async () => {
       try {
-        const res = await API.post('/payment/momo-return-sync', payload);
+        const res = await API.post('/payment/vnpay-return-sync', payload);
         if (!isMounted) return;
         setSyncMessage(
           res.data?.message ||
@@ -49,7 +53,7 @@ const MomoPaymentReturn = () => {
         if (!isMounted) return;
         setSyncMessage(
           error.response?.data?.message ||
-            'Chưa thể đồng bộ trạng thái booking tự động. Hệ thống vẫn có thể cập nhật sau từ IPN MoMo.'
+            'Chưa thể đồng bộ trạng thái booking tự động. Vui lòng kiểm tra lại trong lịch sử đặt tour.'
         );
       }
     };
@@ -59,7 +63,7 @@ const MomoPaymentReturn = () => {
     return () => {
       isMounted = false;
     };
-  }, [ok, orderId, payload, resultCode]);
+  }, [ok, payload, responseCode, txnRef]);
 
   return (
     <div className="page-container momo-return">
@@ -69,7 +73,7 @@ const MomoPaymentReturn = () => {
             <div className="momo-return__icon momo-return__icon--success" aria-hidden>
               <FaCheckCircle />
             </div>
-            <h1 className="momo-return__title">Thanh toán MoMo thành công</h1>
+            <h1 className="momo-return__title">Thanh toán VNPay thành công</h1>
             <p className="momo-return__lead">
               {syncMessage || 'Giao dịch đã được ghi nhận và booking đang được đồng bộ trạng thái.'}
             </p>
@@ -79,35 +83,44 @@ const MomoPaymentReturn = () => {
             <div className="momo-return__icon momo-return__icon--warn" aria-hidden>
               <FaExclamationTriangle />
             </div>
-            <h1 className="momo-return__title">Thanh toán chưa hoàn tất</h1>
+            <h1 className="momo-return__title">Thanh toán VNPay chưa hoàn tất</h1>
             <p className="momo-return__lead">
               {syncMessage ||
-                message ||
                 'Giao dịch không thành công hoặc đã bị hủy. Booking sẽ được chuyển sang Đã hủy.'}
             </p>
           </>
         )}
 
         <div className="momo-return__panel">
-          <h2 className="momo-return__panel-title">Chi tiết giao dịch MoMo</h2>
+          <h2 className="momo-return__panel-title">Chi tiết giao dịch VNPay</h2>
 
           <div className="momo-return__row">
-            <span className="momo-return__label">Mã đơn (orderId)</span>
+            <span className="momo-return__label">Mã đơn (vnp_TxnRef)</span>
             <span className="momo-return__value momo-return__value--code">
-              {orderId || '—'}
+              {txnRef || '—'}
             </span>
           </div>
 
           <div className="momo-return__row">
             <span className="momo-return__label">Số tiền</span>
             <span className="momo-return__value momo-return__value--amount">
-              {amount ? `${Number(amount).toLocaleString('vi-VN')}đ` : '—'}
+              {amount ? `${Number(amount / 100).toLocaleString('vi-VN')}đ` : '—'}
             </span>
           </div>
 
           <div className="momo-return__row">
-            <span className="momo-return__label">Mã kết quả (resultCode)</span>
-            <span className="momo-return__badge">{resultCode ?? '—'}</span>
+            <span className="momo-return__label">Mã phản hồi</span>
+            <span className="momo-return__badge">{responseCode || '—'}</span>
+          </div>
+
+          <div className="momo-return__row">
+            <span className="momo-return__label">Trạng thái giao dịch</span>
+            <span className="momo-return__badge">{transactionStatus || '—'}</span>
+          </div>
+
+          <div className="momo-return__row">
+            <span className="momo-return__label">Nội dung</span>
+            <span className="momo-return__value">{message || '—'}</span>
           </div>
         </div>
 
@@ -124,4 +137,4 @@ const MomoPaymentReturn = () => {
   );
 };
 
-export default MomoPaymentReturn;
+export default VNPayPaymentReturn;

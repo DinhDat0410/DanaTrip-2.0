@@ -20,6 +20,7 @@ import FoodDetail from './pages/public/FoodDetail';
 import Booking from './pages/public/Booking';
 import BookingSuccess from './pages/public/BookingSuccess';
 import MomoPaymentReturn from './pages/public/MomoPaymentReturn';
+import VNPayPaymentReturn from './pages/public/VNPayPaymentReturn';
 import Contact from './pages/public/Contact';
 import Login from './pages/public/Login';
 import Register from './pages/public/Register';
@@ -62,6 +63,7 @@ function App() {
             <Route path="booking/:tourId" element={<ProtectedRoute><Booking /></ProtectedRoute>} />
             <Route path="booking-success" element={<ProtectedRoute><BookingSuccess /></ProtectedRoute>} />
             <Route path="payment/momo-return" element={<MomoPaymentReturn />} />
+            <Route path="payment/vnpay-return" element={<VNPayPaymentReturn />} />
             <Route path="profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
           </Route>
 
