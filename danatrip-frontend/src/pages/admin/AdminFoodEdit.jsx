@@ -3,10 +3,27 @@ import { useParams, useNavigate } from "react-router-dom";
 import API from "../../api/axios";
 import Loading from "../../components/common/Loading";
 import { toast } from "react-toastify";
-import { FaSave, FaArrowLeft, FaPlus, FaTrash } from "react-icons/fa";
+import { FaSave, FaArrowLeft, FaPlus, FaTrash, FaGripLines } from "react-icons/fa";
 import "../../styles/adminForm.css";
 import ImageUpload from "../../components/common/ImageUpload";
 import MultiImageUpload from "../../components/common/MultiImageUpload";
+
+const reorderList = (items, fromIndex, toIndex) => {
+  if (
+    fromIndex === null ||
+    toIndex === null ||
+    fromIndex === toIndex ||
+    fromIndex < 0 ||
+    toIndex < 0
+  ) {
+    return items;
+  }
+
+  const updated = [...items];
+  const [moved] = updated.splice(fromIndex, 1);
+  updated.splice(toIndex, 0, moved);
+  return updated;
+};
 
 const AdminFoodEdit = () => {
   const { id } = useParams();
@@ -15,6 +32,7 @@ const AdminFoodEdit = () => {
 
   const [loading, setLoading] = useState(isEdit);
   const [submitting, setSubmitting] = useState(false);
+  const [dragging, setDragging] = useState({ section: null, index: null });
 
   const [form, setForm] = useState({
     tenMon: "",
@@ -130,6 +148,49 @@ const AdminFoodEdit = () => {
     }));
   };
 
+  const handleDragStart = (section, index) => {
+    setDragging({ section, index });
+  };
+
+  const handleDropItem = (section, index) => {
+    if (dragging.section !== section || dragging.index === null) {
+      setDragging({ section: null, index: null });
+      return;
+    }
+
+    setForm((prev) => {
+      const reordered = reorderList(prev[section], dragging.index, index);
+
+      if (section === "quyTrinh") {
+        return {
+          ...prev,
+          quyTrinh: reordered.map((item, itemIndex) => ({
+            ...item,
+            thuTu: itemIndex + 1,
+          })),
+        };
+      }
+
+      return {
+        ...prev,
+        [section]: reordered,
+      };
+    });
+
+    setDragging({ section: null, index: null });
+  };
+
+  const draggableItemProps = (section, index) => ({
+    draggable: true,
+    onDragStart: () => handleDragStart(section, index),
+    onDragOver: (e) => e.preventDefault(),
+    onDrop: () => handleDropItem(section, index),
+    onDragEnd: () => setDragging({ section: null, index: null }),
+    className: `dynamic-item draggable-item ${
+      dragging.section === section && dragging.index === index ? "dragging" : ""
+    }`,
+  });
+
   // === Submit ===
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -238,7 +299,10 @@ const AdminFoodEdit = () => {
             </button>
           </div>
           {form.nguyenLieu.map((nl, i) => (
-            <div key={i} className="dynamic-item">
+            <div key={i} {...draggableItemProps("nguyenLieu", i)}>
+              <button type="button" className="drag-handle" aria-label="Kéo để sắp xếp">
+                <FaGripLines />
+              </button>
               <span className="item-number">{i + 1}</span>
               <input
                 type="text"
@@ -274,7 +338,10 @@ const AdminFoodEdit = () => {
             </button>
           </div>
           {form.quyTrinh.map((qt, i) => (
-            <div key={i} className="dynamic-item">
+            <div key={i} {...draggableItemProps("quyTrinh", i)}>
+              <button type="button" className="drag-handle" aria-label="Kéo để sắp xếp">
+                <FaGripLines />
+              </button>
               <span className="item-number">{qt.thuTu}</span>
               <div className="dynamic-item-fields">
                 <input
@@ -318,7 +385,10 @@ const AdminFoodEdit = () => {
             </button>
           </div>
           {form.quanAn.map((qa, i) => (
-            <div key={i} className="dynamic-item">
+            <div key={i} {...draggableItemProps("quanAn", i)}>
+              <button type="button" className="drag-handle" aria-label="Kéo để sắp xếp">
+                <FaGripLines />
+              </button>
               <div className="dynamic-item-fields three-cols">
                 <input
                   type="text"

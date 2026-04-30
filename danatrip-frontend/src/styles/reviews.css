@@ -19,7 +19,7 @@
   gap: 1.5rem;
 }
 
-.review-card {
+.reviews-page-card {
   background: var(--bg-white);
   border-radius: var(--radius-md);
   padding: 1.5rem;
@@ -31,18 +31,18 @@
   transition: var(--transition);
 }
 
-.review-card:hover {
+.reviews-page-card:hover {
   box-shadow: var(--shadow-md);
   transform: translateY(-3px);
 }
 
-.review-card-header {
+.reviews-page-card-header {
   display: flex;
   align-items: center;
   gap: 0.8rem;
 }
 
-.review-avatar {
+.reviews-page-avatar {
   width: 48px;
   height: 48px;
   border-radius: 50%;
@@ -56,48 +56,61 @@
   flex-shrink: 0;
 }
 
-.review-user-info {
+.reviews-page-user-info {
   display: flex;
   flex-direction: column;
   gap: 0.2rem;
 }
 
-.review-user-name {
+.reviews-page-user-name {
   font-weight: 600;
   color: var(--dark);
   font-size: 0.95rem;
 }
 
-.review-date {
+.reviews-page-date {
   font-size: 0.8rem;
   color: var(--text-light);
 }
 
-.review-stars {
-  display: flex;
-  gap: 2px;
+.reviews-page-stars {
+  display: block;
+  line-height: 1;
 }
 
-.review-stars .star {
+.reviews-page-rating {
+  position: relative;
+  display: inline-block;
+  width: max-content;
+  max-width: max-content;
   font-size: 1.1rem;
+  line-height: 1;
+  letter-spacing: 2px;
+  white-space: nowrap;
 }
 
-.review-stars .star.filled {
-  color: #ffb400;
-}
-
-.review-stars .star.empty {
+.reviews-page-rating-empty {
+  display: block;
   color: #ddd;
 }
 
-.review-content {
+.reviews-page-rating-filled {
+  position: absolute;
+  inset: 0 auto 0 0;
+  display: block;
+  overflow: hidden;
+  color: #ffb400;
+  white-space: nowrap;
+}
+
+.reviews-page-content {
   color: var(--text);
   font-size: 0.95rem;
   line-height: 1.7;
   flex: 1;
 }
 
-.review-tour-link {
+.reviews-page-tour-link {
   display: inline-block;
   color: var(--primary);
   font-size: 0.85rem;
@@ -109,7 +122,7 @@
   transition: var(--transition);
 }
 
-.review-tour-link:hover {
+.reviews-page-tour-link:hover {
   background: rgba(0, 119, 204, 0.15);
 }
 

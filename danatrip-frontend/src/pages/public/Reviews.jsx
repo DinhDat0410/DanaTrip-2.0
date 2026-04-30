@@ -23,9 +23,20 @@ const Reviews = () => {
   }, []);
 
   const renderStars = (count) => {
-    return Array.from({ length: 5 }, (_, i) => (
-      <span key={i} className={i < count ? 'star filled' : 'star empty'}>★</span>
-    ));
+    const rating = Math.max(0, Math.min(5, Number(count) || 0));
+
+    return (
+      <span className="reviews-page-rating" aria-label={`${rating} trên 5 sao`}>
+        <span className="reviews-page-rating-empty">★★★★★</span>
+        <span
+          className="reviews-page-rating-filled"
+          style={{ width: `${(rating / 5) * 100}%` }}
+          aria-hidden="true"
+        >
+          ★★★★★
+        </span>
+      </span>
+    );
   };
 
   if (loading) return <Loading />;
@@ -39,27 +50,27 @@ const Reviews = () => {
         {reviews.length > 0 ? (
           <div className="reviews-grid">
             {reviews.map((review) => (
-              <div key={review._id} className="review-card">
-                <div className="review-card-header">
-                  <div className="review-avatar">
+              <div key={review._id} className="reviews-page-card">
+                <div className="reviews-page-card-header">
+                  <div className="reviews-page-avatar">
                     {review.user?.hoTen?.charAt(0)?.toUpperCase() || '?'}
                   </div>
-                  <div className="review-user-info">
-                    <span className="review-user-name">{review.user?.hoTen || 'Ẩn danh'}</span>
-                    <span className="review-date">
+                  <div className="reviews-page-user-info">
+                    <span className="reviews-page-user-name">{review.user?.hoTen || 'Ẩn danh'}</span>
+                    <span className="reviews-page-date">
                       {new Date(review.createdAt).toLocaleDateString('vi-VN')}
                     </span>
                   </div>
                 </div>
 
-                <div className="review-stars">
+                <div className="reviews-page-stars">
                   {renderStars(review.sao)}
                 </div>
 
-                <p className="review-content">{review.noiDung}</p>
+                <p className="reviews-page-content">{review.noiDung}</p>
 
                 {review.tour && (
-                  <Link to={`/tours/${review.tour._id}`} className="review-tour-link">
+                  <Link to={`/tours/${review.tour._id}`} className="reviews-page-tour-link">
                     🗺️ {review.tour.tenTour}
                   </Link>
                 )}

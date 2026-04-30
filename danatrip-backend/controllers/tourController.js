@@ -48,7 +48,7 @@ exports.getTours = async (req, res) => {
     }
 
     if (req.query.diaDiem) {
-      query.diaDiem = req.query.diaDiem;
+      query.diaDiem = { $in: [req.query.diaDiem] };
     }
     if (req.query.tag) {
       query.tags = { $in: [req.query.tag] };
@@ -209,7 +209,7 @@ exports.deleteTour = async (req, res) => {
 exports.getToursByPlace = async (req, res) => {
   try {
     const tours = await Tour.find({
-      diaDiem: req.params.placeId,
+      diaDiem: { $in: [req.params.placeId] },
       hienThi: true,
     })
       .populate('diaDiem', 'tenDiaDiem')

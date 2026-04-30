@@ -26,9 +26,12 @@ const TourIncludeSchema = new mongoose.Schema({
 const TourSchema = new mongoose.Schema(
   {
     diaDiem: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Place',
-      required: [true, 'Tour phải thuộc một địa điểm'],
+      type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Place' }],
+      validate: {
+        validator: (value) => Array.isArray(value) && value.length > 0,
+        message: 'Tour phải có ít nhất một địa điểm',
+      },
+      required: [true, 'Tour phải có ít nhất một địa điểm'],
     },
     partner: {
       type: mongoose.Schema.Types.ObjectId,

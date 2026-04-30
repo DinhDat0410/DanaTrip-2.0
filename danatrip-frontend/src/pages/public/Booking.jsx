@@ -8,6 +8,13 @@ import '../../styles/booking.css';
 
 const VN_PHONE_REGEX = /^(0|\+84)(3[2-9]|5[6|8|9]|7[0|6|7|8|9]|8[0-9]|9[0-9])[0-9]{7}$/;
 
+const getPlaceNames = (diaDiem) => {
+  if (Array.isArray(diaDiem)) {
+    return diaDiem.map((place) => place?.tenDiaDiem).filter(Boolean).join(', ');
+  }
+  return diaDiem?.tenDiaDiem || '';
+};
+
 const Booking = () => {
   const { tourId } = useParams();
   const { user } = useAuth();
@@ -289,7 +296,7 @@ const Booking = () => {
 
               <h2>{tour.tenTour}</h2>
               <p className="summary-location">
-                📍 {tour.diaDiem?.tenDiaDiem || 'Đà Nẵng'}
+                📍 {getPlaceNames(tour.diaDiem) || 'Đà Nẵng'}
               </p>
 
               {tour.ngayKhoiHanh && (

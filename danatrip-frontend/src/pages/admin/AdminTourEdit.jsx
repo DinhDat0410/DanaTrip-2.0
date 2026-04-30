@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import API from '../../api/axios';
 import Loading from '../../components/common/Loading';
 import { toast } from 'react-toastify';
-import { FaSave, FaArrowLeft, FaPlus, FaTrash } from 'react-icons/fa';
+import { FaSave, FaArrowLeft, FaPlus, FaTrash, FaChevronDown, FaSearch } from 'react-icons/fa';
 import '../../styles/adminForm.css';
 import ImageUpload from '../../components/common/ImageUpload';
 import { useAuth } from '../../hooks/useAuth';
@@ -19,12 +19,15 @@ const AdminTourEdit = () => {
   const [submitting, setSubmitting] = useState(false);
   const [places, setPlaces] = useState([]);
   const [partners, setPartners] = useState([]);
+  const [placeDropdownOpen, setPlaceDropdownOpen] = useState(false);
+  const [placeSearch, setPlaceSearch] = useState('');
+  const placeDropdownRef = useRef(null);
 
   const [form, setForm] = useState({
     tenTour: '',
     moTaNgan: '',
     moTaChiTiet: '',
-    diaDiem: '',
+    diaDiem: [],
     giaNguoiLon: 0,
     giaTreEm: 0,
     soCho: 20,
@@ -53,11 +56,16 @@ const AdminTourEdit = () => {
         if (isEdit) {
           const tourRes = await API.get(`/tours/${id}`);
           const data = tourRes.data.data;
+          const selectedPlaces = Array.isArray(data.diaDiem)
+            ? data.diaDiem.map((place) => place?._id || place).filter(Boolean)
+            : data.diaDiem
+              ? [data.diaDiem?._id || data.diaDiem].filter(Boolean)
+              : [];
           setForm({
             tenTour: data.tenTour || '',
             moTaNgan: data.moTaNgan || '',
             moTaChiTiet: data.moTaChiTiet || '',
-            diaDiem: data.diaDiem?._id || data.diaDiem || '',
+            diaDiem: selectedPlaces,
             giaNguoiLon: data.giaNguoiLon || 0,
             giaTreEm: data.giaTreEm || 0,
             soCho: data.soCho || 20,
@@ -81,11 +89,52 @@ const AdminTourEdit = () => {
     fetchData();
   }, [id, isEdit, isWebsiteManager, navigate]);
 
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (placeDropdownRef.current && !placeDropdownRef.current.contains(event.target)) {
+        setPlaceDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setForm((prev) => ({
       ...prev,
       [name]: type === 'checkbox' ? checked : type === 'number' ? Number(value) : value,
+    }));
+  };
+
+  const filteredPlaces = useMemo(() => {
+    const keyword = placeSearch.trim().toLowerCase();
+    if (!keyword) return places;
+    return places.filter((place) => place.tenDiaDiem?.toLowerCase().includes(keyword));
+  }, [places, placeSearch]);
+
+  const selectedPlaceLabels = useMemo(
+    () => places.filter((place) => form.diaDiem.includes(place._id)),
+    [places, form.diaDiem]
+  );
+
+  const togglePlaceSelection = (placeId) => {
+    setForm((prev) => {
+      const exists = prev.diaDiem.includes(placeId);
+      return {
+        ...prev,
+        diaDiem: exists
+          ? prev.diaDiem.filter((id) => id !== placeId)
+          : [...prev.diaDiem, placeId],
+      };
+    });
+  };
+
+  const removeSelectedPlace = (placeId) => {
+    setForm((prev) => ({
+      ...prev,
+      diaDiem: prev.diaDiem.filter((id) => id !== placeId),
     }));
   };
 
@@ -156,6 +205,7 @@ const AdminTourEdit = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!form.tenTour.trim()) return toast.error('Vui lòng nhập tên tour');
+    if (form.diaDiem.length === 0) return toast.error('Vui lòng chọn ít nhất một địa điểm');
 
     const payload = {
       ...form,
@@ -206,12 +256,70 @@ const AdminTourEdit = () => {
             </div>
             <div className="form-group">
               <label>Địa điểm</label>
-              <select name="diaDiem" value={form.diaDiem} onChange={handleChange}>
-                <option value="">-- Chọn địa điểm --</option>
-                {places.map((p) => (
-                  <option key={p._id} value={p._id}>{p.tenDiaDiem}</option>
-                ))}
-              </select>
+              <div className="multi-select" ref={placeDropdownRef}>
+                <button
+                  type="button"
+                  className={`multi-select-trigger ${placeDropdownOpen ? 'open' : ''}`}
+                  onClick={() => setPlaceDropdownOpen((prev) => !prev)}
+                >
+                  <span className={selectedPlaceLabels.length ? 'multi-select-value' : 'multi-select-placeholder'}>
+                    {selectedPlaceLabels.length
+                      ? `${selectedPlaceLabels.length} địa điểm đã chọn`
+                      : 'Chọn địa điểm'}
+                  </span>
+                  <FaChevronDown className={`multi-select-chevron ${placeDropdownOpen ? 'open' : ''}`} />
+                </button>
+
+                {selectedPlaceLabels.length > 0 && (
+                  <div className="selected-chips">
+                    {selectedPlaceLabels.map((place) => (
+                      <button
+                        key={place._id}
+                        type="button"
+                        className="selected-chip"
+                        onClick={() => removeSelectedPlace(place._id)}
+                      >
+                        <span>{place.tenDiaDiem}</span>
+                        <span className="chip-remove">×</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                {placeDropdownOpen && (
+                  <div className="multi-select-panel">
+                    <div className="multi-select-search">
+                      <FaSearch className="multi-select-search-icon" />
+                      <input
+                        type="text"
+                        value={placeSearch}
+                        onChange={(e) => setPlaceSearch(e.target.value)}
+                        placeholder="Tìm địa điểm..."
+                      />
+                    </div>
+
+                    <div className="multi-select-options">
+                      {filteredPlaces.length > 0 ? (
+                        filteredPlaces.map((place) => {
+                          const checked = form.diaDiem.includes(place._id);
+                          return (
+                            <label key={place._id} className={`multi-select-option ${checked ? 'selected' : ''}`}>
+                              <input
+                                type="checkbox"
+                                checked={checked}
+                                onChange={() => togglePlaceSelection(place._id)}
+                              />
+                              <span>{place.tenDiaDiem}</span>
+                            </label>
+                          );
+                        })
+                      ) : (
+                        <div className="multi-select-empty">Không tìm thấy địa điểm phù hợp.</div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
             <div className="form-group">
               <label>Ngày khởi hành</label>

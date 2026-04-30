@@ -104,6 +104,41 @@
   border: 1px solid #eee;
 }
 
+.draggable-item {
+  cursor: grab;
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s, opacity 0.2s;
+}
+
+.draggable-item:hover {
+  border-color: #c9d8ea;
+}
+
+.draggable-item.dragging {
+  opacity: 0.6;
+  border-color: #0077cc;
+  background: #eef6ff;
+  box-shadow: 0 8px 20px rgba(0, 119, 204, 0.12);
+}
+
+.drag-handle {
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 8px;
+  background: #e9f2fb;
+  color: #0077cc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  cursor: grab;
+  margin-top: 2px;
+}
+
+.drag-handle:active {
+  cursor: grabbing;
+}
+
 .dynamic-item.included {
   border-left: 3px solid #27ae60;
 }
@@ -315,6 +350,144 @@
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
+}
+
+.multi-select {
+  position: relative;
+}
+
+.multi-select-trigger {
+  width: 100%;
+  min-height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0.7rem 0.9rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: white;
+  font-size: 0.9rem;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.multi-select-trigger.open {
+  border-color: #0077cc;
+  box-shadow: 0 0 0 3px rgba(0, 119, 204, 0.1);
+}
+
+.multi-select-placeholder {
+  color: #98a2b3;
+}
+
+.multi-select-value {
+  color: #101828;
+}
+
+.multi-select-chevron {
+  color: #667085;
+  transition: transform 0.2s;
+}
+
+.multi-select-chevron.open {
+  transform: rotate(180deg);
+}
+
+.selected-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 0.75rem;
+}
+
+.selected-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid #cfe0f2;
+  border-radius: 999px;
+  background: #f0f7ff;
+  color: #0b5cab;
+  padding: 6px 12px;
+  cursor: pointer;
+}
+
+.chip-remove {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.multi-select-panel {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  z-index: 20;
+  background: white;
+  border: 1px solid #d0d5dd;
+  border-radius: 10px;
+  box-shadow: 0 12px 32px rgba(16, 24, 40, 0.14);
+  padding: 0.75rem;
+}
+
+.multi-select-search {
+  position: relative;
+  margin-bottom: 0.75rem;
+}
+
+.multi-select-search input {
+  width: 100%;
+  padding: 0.65rem 0.8rem 0.65rem 2.2rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+}
+
+.multi-select-search-icon {
+  position: absolute;
+  top: 50%;
+  left: 0.8rem;
+  transform: translateY(-50%);
+  color: #98a2b3;
+}
+
+.multi-select-options {
+  max-height: 240px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.multi-select-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0.7rem 0.75rem;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.multi-select-option:hover {
+  background: #f8fafc;
+}
+
+.multi-select-option.selected {
+  background: #eef6ff;
+}
+
+.multi-select-option input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: #0077cc;
+}
+
+.multi-select-empty {
+  padding: 0.9rem 0.75rem;
+  color: #98a2b3;
+  text-align: center;
+  font-size: 0.9rem;
 }
 
 .tag-chip {
