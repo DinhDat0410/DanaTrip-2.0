@@ -4,18 +4,37 @@ import ReactMarkdown from 'react-markdown';
 import { FaComments, FaTimes, FaPaperPlane, FaRobot, FaUser } from 'react-icons/fa';
 import '../../styles/chat.css';
 
-const ChatWidget = () => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState([
+const CHAT_SESSION_KEY = 'danatrip_chat_session_id';
+const WELCOME_MESSAGE = {
+  role: 'ai',
+  content: 'Xin chào! 👋 Tôi là trợ lý du lịch DANATrip. Bạn muốn khám phá gì ở Đà Nẵng?',
+  suggestions: null,
+};
+
+const mapHistoryMessages = (historyMessages = []) =>
+  historyMessages.flatMap((msg) => [
     {
-      role: 'ai',
-      content: 'Xin chào! 👋 Tôi là trợ lý du lịch DANATrip. Bạn muốn khám phá gì ở Đà Nẵng?',
+      role: 'user',
+      content: msg.tinNhanNguoiDung,
       suggestions: null,
     },
+    {
+      role: 'ai',
+      content: msg.phanHoiAI,
+      suggestions: {
+        tours: msg.tourGoiY || [],
+        places: msg.placeGoiY || [],
+        foods: msg.foodGoiY || [],
+      },
+    },
   ]);
+
+const ChatWidget = () => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [messages, setMessages] = useState([WELCOME_MESSAGE]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
-  const [sessionId, setSessionId] = useState(null);
+  const [sessionId, setSessionId] = useState(() => localStorage.getItem(CHAT_SESSION_KEY));
 
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
@@ -29,6 +48,31 @@ const ChatWidget = () => {
       setTimeout(() => inputRef.current?.focus(), 300);
     }
   }, [isOpen]);
+
+  useEffect(() => {
+    const loadSavedChat = async () => {
+      if (!sessionId) return;
+
+      try {
+        const res = await API.get(`/chat/${sessionId}`);
+        const savedMessages = mapHistoryMessages(res.data.data?.messages);
+        setMessages(savedMessages.length > 0 ? savedMessages : [WELCOME_MESSAGE]);
+      } catch (error) {
+        if (error.response?.status === 404) {
+          localStorage.removeItem(CHAT_SESSION_KEY);
+          setSessionId(null);
+        }
+      }
+    };
+
+    loadSavedChat();
+  }, []);
+
+  const persistSession = (newSessionId) => {
+    if (!newSessionId) return;
+    setSessionId(newSessionId);
+    localStorage.setItem(CHAT_SESSION_KEY, newSessionId);
+  };
 
   const sendMessage = async (e) => {
     e.preventDefault();
@@ -47,7 +91,7 @@ const ChatWidget = () => {
       });
 
       const { data, sessionId: newSessionId } = res.data;
-      if (newSessionId) setSessionId(newSessionId);
+      persistSession(newSessionId);
 
       setMessages((prev) => [
         ...prev,
@@ -79,7 +123,7 @@ const ChatWidget = () => {
     API.post('/chat', { message: text, sessionId })
       .then((res) => {
         const { data, sessionId: newSessionId } = res.data;
-        if (newSessionId) setSessionId(newSessionId);
+        persistSession(newSessionId);
         setMessages((prev) => [
           ...prev,
           { role: 'ai', content: data.message, suggestions: data.suggestions },
@@ -96,13 +140,8 @@ const ChatWidget = () => {
 
   const handleNewChat = () => {
     setSessionId(null);
-    setMessages([
-      {
-        role: 'ai',
-        content: 'Xin chào! 👋 Tôi là trợ lý du lịch DANATrip. Bạn muốn khám phá gì ở Đà Nẵng?',
-        suggestions: null,
-      },
-    ]);
+    localStorage.removeItem(CHAT_SESSION_KEY);
+    setMessages([WELCOME_MESSAGE]);
   };
 
   return (

@@ -44,6 +44,7 @@ import AdminReviews from './pages/admin/AdminReview';
 import AdminContacts from './pages/admin/AdminContact';
 import AdminUsers from './pages/admin/AdminUser';
 import AdminUserEdit from './pages/admin/AdminUserEdit';
+import AdminChatHistory from './pages/admin/AdminChatHistory';
 
 function App() {
   return (
@@ -90,6 +91,7 @@ function App() {
             <Route path="bookings" element={<ProtectedRoute allowedRoles={['WebsiteManager']}><AdminBookings /></ProtectedRoute>} />
             <Route path="reviews" element={<ProtectedRoute allowedRoles={['WebsiteManager']}><AdminReviews /></ProtectedRoute>} />
             <Route path="contacts" element={<ProtectedRoute allowedRoles={['WebsiteManager']}><AdminContacts /></ProtectedRoute>} />
+            <Route path="chat-history" element={<ProtectedRoute allowedRoles={['WebsiteManager']}><AdminChatHistory /></ProtectedRoute>} />
             <Route path="users" element={<ProtectedRoute allowedRoles={['Admin']}><AdminUsers /></ProtectedRoute>} />
             <Route path="users/new" element={<ProtectedRoute allowedRoles={['Admin']}><AdminUserEdit /></ProtectedRoute>} />
             <Route path="users/edit/:id" element={<ProtectedRoute allowedRoles={['Admin']}><AdminUserEdit /></ProtectedRoute>} />

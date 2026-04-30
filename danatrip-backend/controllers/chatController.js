@@ -55,6 +55,9 @@ ${foods.map((f) => `- ${f.tenMon}: ${f.moTa}`).join('\n')}
     if (sessionId) {
       chatHistory = await ChatHistory.findOne({ sessionId });
       if (chatHistory) {
+        if (!chatHistory.user && req.user?._id) {
+          chatHistory.user = req.user._id;
+        }
         // Lấy 10 tin nhắn gần nhất làm context
         previousMessages = chatHistory.messages.slice(-10).flatMap((msg) => [
           { role: 'user', parts: [{ text: msg.tinNhanNguoiDung }] },
@@ -191,6 +194,42 @@ exports.getMySessions = async (req, res) => {
           ? s.messages[s.messages.length - 1].tinNhanNguoiDung
           : '',
     }));
+
+    res.status(200).json({
+      success: true,
+      count: sessionList.length,
+      data: sessionList,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// @desc    Lấy tất cả lịch sử chat (Admin)
+// @route   GET /api/chat/admin/sessions
+exports.getAllSessions = async (req, res) => {
+  try {
+    const sessions = await ChatHistory.find()
+      .populate('user', 'hoTen email vaiTro')
+      .populate('messages.tourGoiY', 'tenTour giaNguoiLon')
+      .populate('messages.placeGoiY', 'tenDiaDiem hinhAnhChinh')
+      .populate('messages.foodGoiY', 'tenMon hinhAnh')
+      .sort('-updatedAt');
+
+    const sessionList = sessions.map((s) => {
+      const lastMessage = s.messages[s.messages.length - 1];
+
+      return {
+        _id: s._id,
+        sessionId: s.sessionId,
+        user: s.user,
+        createdAt: s.createdAt,
+        updatedAt: s.updatedAt,
+        messageCount: s.messages.length,
+        lastMessage: lastMessage?.tinNhanNguoiDung || '',
+        messages: s.messages,
+      };
+    });
 
     res.status(200).json({
       success: true,

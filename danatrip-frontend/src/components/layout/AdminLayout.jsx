@@ -8,6 +8,7 @@ import {
   FaCalendarCheck,
   FaStar,
   FaEnvelope,
+  FaComments,
   FaUsers,
   FaArrowLeft,
   FaSignOutAlt,
@@ -31,6 +32,7 @@ const AdminLayout = () => {
       { path: '/admin/bookings', icon: <FaCalendarCheck />, label: 'Booking' },
       { path: '/admin/reviews', icon: <FaStar />, label: 'Đánh giá' },
       { path: '/admin/contacts', icon: <FaEnvelope />, label: 'Liên hệ' },
+      { path: '/admin/chat-history', icon: <FaComments />, label: 'Chat AI' },
     ],
     Partner: [
       { path: '/admin/dashboard', icon: <FaChartBar />, label: 'Dashboard' },
