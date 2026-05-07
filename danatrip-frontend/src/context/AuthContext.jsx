@@ -16,7 +16,7 @@ export const AuthProvider = ({ children }) => {
         try {
           const res = await API.get('/auth/me');
           setUser(res.data.user);
-        } catch (error) {
+        } catch {
           // Token hết hạn
           localStorage.removeItem('token');
           localStorage.removeItem('user');
@@ -76,6 +76,11 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
 
+  const updateCurrentUser = (userData) => {
+    localStorage.setItem('user', JSON.stringify(userData));
+    setUser(userData);
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -86,6 +91,7 @@ export const AuthProvider = ({ children }) => {
         register,
         logout,
         socialLogin,
+        updateCurrentUser,
         isAuthenticated: !!token,
         isAdmin: user?.vaiTro === 'Admin',
         isWebsiteManager: user?.vaiTro === 'WebsiteManager',

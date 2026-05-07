@@ -104,9 +104,31 @@ const sendResetPasswordEmail = async ({ email, hoTen, resetUrl }) => {
   return sendMail(email, subject, html);
 };
 
+const sendEmailChangeCode = async ({ email, hoTen, code }) => {
+  if (!email) {
+    return null;
+  }
+
+  const subject = 'DANATrip - Mã xác nhận đổi email';
+  const html = `
+    <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #1f2937; max-width: 640px; margin: 0 auto;">
+      <h2 style="color: #0f766e;">Xác nhận email mới</h2>
+      <p>Xin chào <strong>${hoTen || 'bạn'}</strong>,</p>
+      <p>Bạn đang yêu cầu đổi email cho tài khoản DANATrip.</p>
+      <p>Mã xác nhận của bạn là:</p>
+      <p style="font-size: 28px; letter-spacing: 6px; font-weight: bold; color: #0f766e; margin: 18px 0;">${code}</p>
+      <p>Mã này có hiệu lực trong <strong>10 phút</strong>. Nếu bạn không yêu cầu đổi email, hãy bỏ qua email này.</p>
+      <p>Trân trọng,<br /><strong>DANATrip</strong></p>
+    </div>
+  `;
+
+  return sendMail(email, subject, html);
+};
+
 module.exports = {
   hasMailConfig,
   sendMail,
   sendBookingConfirmationEmail,
   sendResetPasswordEmail,
+  sendEmailChangeCode,
 };

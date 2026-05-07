@@ -3,11 +3,11 @@ import { useAuth } from '../../hooks/useAuth';
 import API from '../../api/axios';
 import Loading from '../../components/common/Loading';
 import { toast } from 'react-toastify';
-import { FaUser, FaHistory, FaStar, FaTimes } from 'react-icons/fa';
+import { FaUser, FaHistory, FaStar, FaTimes, FaSave, FaEnvelope, FaLock } from 'react-icons/fa';
 import '../../styles/profile.css';
 
 const Profile = () => {
-  const { user } = useAuth();
+  const { user, updateCurrentUser } = useAuth();
   const [activeTab, setActiveTab] = useState('info');
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -15,6 +15,25 @@ const Profile = () => {
   const [reviewForm, setReviewForm] = useState({ sao: 5, noiDung: '' });
   const [submittingReview, setSubmittingReview] = useState(false);
   const [reviewedTours, setReviewedTours] = useState([]);
+  const [profileForm, setProfileForm] = useState({ hoTen: '', sdt: '' });
+  const [passwordForm, setPasswordForm] = useState({
+    matKhauCu: '',
+    matKhauMoi: '',
+    xacNhanMatKhauMoi: '',
+  });
+  const [emailForm, setEmailForm] = useState({ emailMoi: '', maXacNhan: '' });
+  const [isEmailCodeSent, setIsEmailCodeSent] = useState(false);
+  const [savingProfile, setSavingProfile] = useState(false);
+  const [changingPassword, setChangingPassword] = useState(false);
+  const [requestingEmailCode, setRequestingEmailCode] = useState(false);
+  const [confirmingEmail, setConfirmingEmail] = useState(false);
+
+  useEffect(() => {
+    setProfileForm({
+      hoTen: user?.hoTen || '',
+      sdt: user?.sdt || '',
+    });
+  }, [user]);
 
   // Load bookings khi chuyển sang tab lịch sử
   useEffect(() => {
@@ -72,6 +91,68 @@ const Profile = () => {
       toast.error(error.response?.data?.message || 'Gửi đánh giá thất bại');
     } finally {
       setSubmittingReview(false);
+    }
+  };
+
+  const handleUpdateProfile = async (e) => {
+    e.preventDefault();
+    setSavingProfile(true);
+    try {
+      const res = await API.put('/auth/profile', profileForm);
+      updateCurrentUser(res.data.user);
+      toast.success(res.data.message || 'Cập nhật thông tin thành công');
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Cập nhật thông tin thất bại');
+    } finally {
+      setSavingProfile(false);
+    }
+  };
+
+  const handleChangePassword = async (e) => {
+    e.preventDefault();
+    setChangingPassword(true);
+    try {
+      await API.put('/auth/change-password', passwordForm);
+      toast.success('Đổi mật khẩu thành công');
+      setPasswordForm({ matKhauCu: '', matKhauMoi: '', xacNhanMatKhauMoi: '' });
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Đổi mật khẩu thất bại');
+    } finally {
+      setChangingPassword(false);
+    }
+  };
+
+  const handleRequestEmailCode = async (e) => {
+    e.preventDefault();
+    setRequestingEmailCode(true);
+    try {
+      const res = await API.post('/auth/request-email-change', {
+        emailMoi: emailForm.emailMoi,
+      });
+      setIsEmailCodeSent(true);
+      toast.success(res.data.message || 'Đã gửi mã xác nhận đến email mới');
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Không gửi được mã xác nhận');
+    } finally {
+      setRequestingEmailCode(false);
+    }
+  };
+
+  const handleConfirmEmailChange = async (e) => {
+    e.preventDefault();
+    setConfirmingEmail(true);
+    try {
+      const res = await API.put('/auth/confirm-email-change', {
+        maXacNhan: emailForm.maXacNhan,
+      });
+      updateCurrentUser(res.data.user);
+      setEmailForm({ emailMoi: '', maXacNhan: '' });
+      setIsEmailCodeSent(false);
+      toast.success(res.data.message || 'Đổi email thành công');
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Đổi email thất bại');
+    } finally {
+      setConfirmingEmail(false);
     }
   };
 
@@ -135,6 +216,126 @@ const Profile = () => {
                     {new Date(user?.createdAt).toLocaleDateString('vi-VN')}
                   </span>
                 </div>
+              </div>
+            </div>
+
+            <div className="account-settings">
+              <form className="settings-card" onSubmit={handleUpdateProfile}>
+                <div className="settings-card-header">
+                  <FaUser />
+                  <h3>Chỉnh sửa thông tin</h3>
+                </div>
+                <div className="form-group">
+                  <label htmlFor="profile-hoTen">Họ tên</label>
+                  <input
+                    id="profile-hoTen"
+                    type="text"
+                    value={profileForm.hoTen}
+                    onChange={(e) => setProfileForm((form) => ({ ...form, hoTen: e.target.value }))}
+                    required
+                  />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="profile-sdt">Số điện thoại</label>
+                  <input
+                    id="profile-sdt"
+                    type="tel"
+                    value={profileForm.sdt}
+                    onChange={(e) => setProfileForm((form) => ({ ...form, sdt: e.target.value }))}
+                    placeholder="Chưa cập nhật"
+                  />
+                </div>
+                <button className="btn-settings" type="submit" disabled={savingProfile}>
+                  <FaSave /> {savingProfile ? 'Đang lưu...' : 'Lưu thông tin'}
+                </button>
+              </form>
+
+              <form className="settings-card" onSubmit={handleChangePassword}>
+                <div className="settings-card-header">
+                  <FaLock />
+                  <h3>Đổi mật khẩu</h3>
+                </div>
+                <div className="form-group">
+                  <label htmlFor="current-password">Mật khẩu cũ</label>
+                  <input
+                    id="current-password"
+                    type="password"
+                    value={passwordForm.matKhauCu}
+                    onChange={(e) => setPasswordForm((form) => ({ ...form, matKhauCu: e.target.value }))}
+                    required
+                  />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="new-password">Mật khẩu mới</label>
+                  <input
+                    id="new-password"
+                    type="password"
+                    value={passwordForm.matKhauMoi}
+                    onChange={(e) => setPasswordForm((form) => ({ ...form, matKhauMoi: e.target.value }))}
+                    minLength={6}
+                    required
+                  />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="confirm-new-password">Nhập lại mật khẩu mới</label>
+                  <input
+                    id="confirm-new-password"
+                    type="password"
+                    value={passwordForm.xacNhanMatKhauMoi}
+                    onChange={(e) => setPasswordForm((form) => ({ ...form, xacNhanMatKhauMoi: e.target.value }))}
+                    minLength={6}
+                    required
+                  />
+                </div>
+                <button className="btn-settings" type="submit" disabled={changingPassword}>
+                  <FaLock /> {changingPassword ? 'Đang đổi...' : 'Đổi mật khẩu'}
+                </button>
+              </form>
+
+              <div className="settings-card">
+                <div className="settings-card-header">
+                  <FaEnvelope />
+                  <h3>Đổi email</h3>
+                </div>
+                <form onSubmit={handleRequestEmailCode}>
+                  <div className="form-group">
+                    <label htmlFor="new-email">Email mới</label>
+                    <input
+                      id="new-email"
+                      type="email"
+                      value={emailForm.emailMoi}
+                      onChange={(e) => {
+                        setEmailForm((form) => ({ ...form, emailMoi: e.target.value }));
+                        setIsEmailCodeSent(false);
+                      }}
+                      required
+                    />
+                  </div>
+                  <button className="btn-settings btn-secondary-settings" type="submit" disabled={requestingEmailCode}>
+                    <FaEnvelope /> {requestingEmailCode ? 'Đang gửi...' : 'Gửi mã xác nhận'}
+                  </button>
+                </form>
+
+                {isEmailCodeSent && (
+                  <form className="confirm-email-form" onSubmit={handleConfirmEmailChange}>
+                    <div className="form-group">
+                      <label htmlFor="email-code">Mã xác nhận</label>
+                      <input
+                        id="email-code"
+                        type="text"
+                        inputMode="numeric"
+                        maxLength={6}
+                        value={emailForm.maXacNhan}
+                        onChange={(e) => setEmailForm((form) => ({ ...form, maXacNhan: e.target.value }))}
+                        placeholder="Nhập mã 6 số"
+                        required
+                      />
+                    </div>
+                    <button className="btn-settings" type="submit" disabled={confirmingEmail}>
+                      <FaSave /> {confirmingEmail ? 'Đang xác nhận...' : 'Xác nhận đổi email'}
+                    </button>
+                  </form>
+                )}
               </div>
             </div>
           </div>
