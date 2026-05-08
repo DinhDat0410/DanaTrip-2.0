@@ -1,14 +1,16 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import API from '../../api/axios';
 import Loading from '../../components/common/Loading';
 import { toast } from 'react-toastify';
-import { FaPlus, FaEdit, FaTrash } from 'react-icons/fa';
+import { FaPlus, FaEdit, FaTrash, FaSearch } from 'react-icons/fa';
+import { getImageUrl } from '../../utils/image';
 import '../../styles/admin.css';
 
 const AdminPlaces = () => {
   const [places, setPlaces] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
 
   const fetchPlaces = async () => {
     try {
@@ -23,6 +25,17 @@ const AdminPlaces = () => {
 
   useEffect(() => { fetchPlaces(); }, []);
 
+  const filteredPlaces = useMemo(() => {
+    const keyword = search.trim().toLowerCase();
+    if (!keyword) return places;
+
+    return places.filter((place) => [
+      place.tenDiaDiem,
+      place.viTri,
+      place.hienThi ? 'hiện hien' : 'ẩn an',
+    ].some((value) => String(value || '').toLowerCase().includes(keyword)));
+  }, [places, search]);
+
   const handleDelete = async (id, name) => {
     if (!window.confirm(`Xác nhận xóa địa điểm "${name}"?`)) return;
 
@@ -30,7 +43,7 @@ const AdminPlaces = () => {
       await API.delete(`/places/${id}`);
       toast.success('Đã xóa địa điểm');
       fetchPlaces();
-    } catch (error) {
+    } catch {
       toast.error('Xóa thất bại');
     }
   };
@@ -46,6 +59,18 @@ const AdminPlaces = () => {
         </Link>
       </div>
 
+      <div className="admin-search-bar">
+        <div className="search-input-wrap">
+          <FaSearch className="search-icon" />
+          <input
+            type="text"
+            placeholder="Tìm theo tên địa điểm, vị trí..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
+      </div>
+
       <table className="admin-table full">
         <thead>
           <tr>
@@ -58,11 +83,11 @@ const AdminPlaces = () => {
           </tr>
         </thead>
         <tbody>
-          {places.map((place, i) => (
+          {filteredPlaces.map((place, i) => (
             <tr key={place._id}>
               <td>{i + 1}</td>
               <td>
-                <img src={place.hinhAnhChinh || '/images/placeholder.jpg'} alt="" className="table-img" />
+                <img src={getImageUrl(place.hinhAnhChinh)} alt={place.tenDiaDiem} className="table-img" />
               </td>
               <td><strong>{place.tenDiaDiem}</strong></td>
               <td>{place.viTri}</td>
@@ -83,8 +108,8 @@ const AdminPlaces = () => {
               </td>
             </tr>
           ))}
-          {places.length === 0 && (
-            <tr><td colSpan={6} className="empty">Chưa có địa điểm nào</td></tr>
+          {filteredPlaces.length === 0 && (
+            <tr><td colSpan={6} className="empty">Không tìm thấy địa điểm phù hợp</td></tr>
           )}
         </tbody>
       </table>

@@ -10,6 +10,7 @@ const {
 } = require('../controllers/bookingController');
 const { protect } = require('../middleware/auth');
 const { allowRoles } = require('../middleware/admin');
+const adminLogger = require('../middleware/adminLogger');
 
 // User (cần đăng nhập)
 router.post('/', protect, createBooking);
@@ -19,6 +20,6 @@ router.put('/:id/cancel', protect, cancelBooking);
 
 // Admin
 router.get('/', protect, allowRoles('WebsiteManager'), getAllBookings);
-router.put('/:id', protect, allowRoles('WebsiteManager'), updateBooking);
+router.put('/:id', protect, allowRoles('WebsiteManager'), adminLogger('status_change', 'booking'), updateBooking);
 
 module.exports = router;

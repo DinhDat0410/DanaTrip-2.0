@@ -5,7 +5,7 @@ const AdminHomeRedirect = () => {
   const { user } = useAuth();
 
   if (user?.vaiTro === 'Admin') {
-    return <Navigate to="/admin/users" replace />;
+    return <Navigate to="/admin/dashboard" replace />;
   }
 
   if (user?.vaiTro === 'Partner') {

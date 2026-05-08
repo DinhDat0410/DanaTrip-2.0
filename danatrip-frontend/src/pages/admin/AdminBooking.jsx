@@ -1,14 +1,16 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import API from '../../api/axios';
 import Loading from '../../components/common/Loading';
 import { toast } from 'react-toastify';
+import { FaSearch } from 'react-icons/fa';
 
 const AdminBookings = () => {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('');
+  const [search, setSearch] = useState('');
 
-  const fetchBookings = async () => {
+  const fetchBookings = useCallback(async () => {
     try {
       const params = filter ? `?trangThai=${filter}` : '';
       const res = await API.get(`/bookings${params}`);
@@ -18,16 +20,31 @@ const AdminBookings = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filter]);
 
-  useEffect(() => { setLoading(true); fetchBookings(); }, [filter]);
+  useEffect(() => { setLoading(true); fetchBookings(); }, [fetchBookings]);
+
+  const filteredBookings = useMemo(() => {
+    const keyword = search.trim().toLowerCase();
+    if (!keyword) return bookings;
+
+    return bookings.filter((booking) => [
+      booking.hoTen,
+      booking.sdt,
+      booking.email,
+      booking.tour?.tenTour,
+      booking.phuongThucThanhToan,
+      booking.trangThai,
+      booking.tongTien,
+    ].some((value) => String(value || '').toLowerCase().includes(keyword)));
+  }, [bookings, search]);
 
   const handleUpdateStatus = async (id, trangThai) => {
     try {
       await API.put(`/bookings/${id}`, { trangThai });
       toast.success(`Đã cập nhật → ${trangThai}`);
       fetchBookings();
-    } catch (error) {
+    } catch {
       toast.error('Cập nhật thất bại');
     }
   };
@@ -57,6 +74,18 @@ const AdminBookings = () => {
         </select>
       </div>
 
+      <div className="admin-search-bar">
+        <div className="search-input-wrap">
+          <FaSearch className="search-icon" />
+          <input
+            type="text"
+            placeholder="Tìm theo khách hàng, SĐT, email, tour..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
+      </div>
+
       <table className="admin-table full">
         <thead>
           <tr>
@@ -72,7 +101,7 @@ const AdminBookings = () => {
           </tr>
         </thead>
         <tbody>
-          {bookings.map((b, i) => (
+          {filteredBookings.map((b, i) => (
             <tr key={b._id}>
               <td>{i + 1}</td>
               <td><strong>{b.hoTen}</strong></td>
@@ -103,7 +132,7 @@ const AdminBookings = () => {
               </td>
             </tr>
           ))}
-          {bookings.length === 0 && <tr><td colSpan={9} className="empty">Không có booking nào</td></tr>}
+          {filteredBookings.length === 0 && <tr><td colSpan={9} className="empty">Không tìm thấy booking phù hợp</td></tr>}
         </tbody>
       </table>
     </div>

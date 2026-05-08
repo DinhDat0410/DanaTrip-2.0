@@ -1,15 +1,16 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import API from '../../api/axios';
 import Loading from '../../components/common/Loading';
 import { toast } from 'react-toastify';
-import { FaTrash } from 'react-icons/fa';
+import { FaSearch, FaTrash } from 'react-icons/fa';
 
 const AdminContacts = () => {
   const [contacts, setContacts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('');
+  const [search, setSearch] = useState('');
 
-  const fetchContacts = async () => {
+  const fetchContacts = useCallback(async () => {
     try {
       const params = filter ? `?trangThai=${filter}` : '';
       const res = await API.get(`/contacts${params}`);
@@ -19,16 +20,29 @@ const AdminContacts = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filter]);
 
-  useEffect(() => { setLoading(true); fetchContacts(); }, [filter]);
+  useEffect(() => { setLoading(true); fetchContacts(); }, [fetchContacts]);
+
+  const filteredContacts = useMemo(() => {
+    const keyword = search.trim().toLowerCase();
+    if (!keyword) return contacts;
+
+    return contacts.filter((contact) => [
+      contact.ten,
+      contact.email,
+      contact.noiDung,
+      contact.trangThai,
+      contact.user?.hoTen,
+    ].some((value) => String(value || '').toLowerCase().includes(keyword)));
+  }, [contacts, search]);
 
   const handleUpdateStatus = async (id, trangThai) => {
     try {
       await API.put(`/contacts/${id}`, { trangThai });
       toast.success(`Đã cập nhật → ${trangThai}`);
       fetchContacts();
-    } catch (error) {
+    } catch {
       toast.error('Cập nhật thất bại');
     }
   };
@@ -39,7 +53,7 @@ const AdminContacts = () => {
       await API.delete(`/contacts/${id}`);
       toast.success('Đã xóa');
       fetchContacts();
-    } catch (error) {
+    } catch {
       toast.error('Xóa thất bại');
     }
   };
@@ -57,6 +71,18 @@ const AdminContacts = () => {
         </select>
       </div>
 
+      <div className="admin-search-bar">
+        <div className="search-input-wrap">
+          <FaSearch className="search-icon" />
+          <input
+            type="text"
+            placeholder="Tìm theo tên, email, nội dung..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
+      </div>
+
       <table className="admin-table full">
         <thead>
           <tr>
@@ -70,7 +96,7 @@ const AdminContacts = () => {
           </tr>
         </thead>
         <tbody>
-          {contacts.map((c, i) => (
+          {filteredContacts.map((c, i) => (
             <tr key={c._id}>
               <td>{i + 1}</td>
               <td><strong>{c.ten}</strong></td>
@@ -94,7 +120,7 @@ const AdminContacts = () => {
               </td>
             </tr>
           ))}
-          {contacts.length === 0 && <tr><td colSpan={7} className="empty">Không có liên hệ nào</td></tr>}
+          {filteredContacts.length === 0 && <tr><td colSpan={7} className="empty">Không tìm thấy liên hệ phù hợp</td></tr>}
         </tbody>
       </table>
     </div>

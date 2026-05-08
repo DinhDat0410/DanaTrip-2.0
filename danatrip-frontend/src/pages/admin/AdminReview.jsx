@@ -1,12 +1,13 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import API from '../../api/axios';
 import Loading from '../../components/common/Loading';
 import { toast } from 'react-toastify';
-import { FaTrash } from 'react-icons/fa';
+import { FaSearch, FaTrash } from 'react-icons/fa';
 
 const AdminReviews = () => {
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
 
   const fetchReviews = async () => {
     try {
@@ -21,13 +22,26 @@ const AdminReviews = () => {
 
   useEffect(() => { fetchReviews(); }, []);
 
+  const filteredReviews = useMemo(() => {
+    const keyword = search.trim().toLowerCase();
+    if (!keyword) return reviews;
+
+    return reviews.filter((review) => [
+      review.user?.hoTen,
+      review.user?.email,
+      review.tour?.tenTour,
+      review.sao,
+      review.noiDung,
+    ].some((value) => String(value || '').toLowerCase().includes(keyword)));
+  }, [reviews, search]);
+
   const handleDelete = async (id) => {
     if (!window.confirm('Xác nhận xóa đánh giá này?')) return;
     try {
       await API.delete(`/reviews/${id}`);
       toast.success('Đã xóa đánh giá');
       fetchReviews();
-    } catch (error) {
+    } catch {
       toast.error('Xóa thất bại');
     }
   };
@@ -37,6 +51,18 @@ const AdminReviews = () => {
   return (
     <div className="admin-page">
       <h1>⭐ Quản lý Đánh giá</h1>
+
+      <div className="admin-search-bar">
+        <div className="search-input-wrap">
+          <FaSearch className="search-icon" />
+          <input
+            type="text"
+            placeholder="Tìm theo người dùng, tour, nội dung..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
+      </div>
 
       <table className="admin-table full">
         <thead>
@@ -51,7 +77,7 @@ const AdminReviews = () => {
           </tr>
         </thead>
         <tbody>
-          {reviews.map((r, i) => (
+          {filteredReviews.map((r, i) => (
             <tr key={r._id}>
               <td>{i + 1}</td>
               <td>{r.user?.hoTen || '—'}</td>
@@ -64,7 +90,7 @@ const AdminReviews = () => {
               </td>
             </tr>
           ))}
-          {reviews.length === 0 && <tr><td colSpan={7} className="empty">Chưa có đánh giá nào</td></tr>}
+          {filteredReviews.length === 0 && <tr><td colSpan={7} className="empty">Không tìm thấy đánh giá phù hợp</td></tr>}
         </tbody>
       </table>
     </div>

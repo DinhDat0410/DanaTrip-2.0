@@ -1,9 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const { getDashboardOverview } = require('../controllers/dashboardController');
+const { getAdminLogs } = require('../controllers/adminLogController');
 const { protect } = require('../middleware/auth');
 const { allowRoles } = require('../middleware/admin');
 
-router.get('/overview', protect, allowRoles('Admin', 'WebsiteManager', 'Partner'), getDashboardOverview);
+router.get('/', protect, allowRoles('Admin'), getAdminLogs);
 
 module.exports = router;

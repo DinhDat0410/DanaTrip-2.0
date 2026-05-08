@@ -12,7 +12,7 @@ exports.getFoods = async (req, res) => {
     }
 
     const foods = await Food.find(query)
-      .select('tenMon moTa hinhAnh')
+      .select('tenMon moTa hinhAnh hienThi')
       .sort('-createdAt');
 
     res.status(200).json({

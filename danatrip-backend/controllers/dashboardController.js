@@ -4,6 +4,8 @@ const User = require('../models/User');
 const Review = require('../models/Review');
 const Contact = require('../models/Contact');
 const Visit = require('../models/Visit');
+const ChatHistory = require('../models/ChatHistory');
+const AdminLog = require('../models/AdminLog');
 
 const monthLabels = [
   'T1', 'T2', 'T3', 'T4', 'T5', 'T6',
@@ -124,6 +126,7 @@ const buildPartnerRevenue = (bookings = [], tours = []) => {
 exports.getDashboardOverview = async (req, res) => {
   try {
     const isPartner = req.user.vaiTro === 'Partner';
+    const isAdmin = req.user.vaiTro === 'Admin';
     const tourQuery = isPartner ? { partner: req.user._id } : {};
 
     const tours = await Tour.find(tourQuery)
@@ -134,12 +137,14 @@ exports.getDashboardOverview = async (req, res) => {
     const bookingQuery = isPartner ? { tour: { $in: tourIds } } : {};
     const reviewQuery = isPartner ? { tour: { $in: tourIds } } : {};
 
-    const [bookings, reviews, contacts, users, visits] = await Promise.all([
+    const [bookings, reviews, contacts, users, visits, chatSessions, adminLogs] = await Promise.all([
       Booking.find(bookingQuery).select('tour tongTien trangThai createdAt'),
       Review.find(reviewQuery).select('tour sao createdAt'),
       isPartner ? Promise.resolve([]) : Contact.find().select('trangThai createdAt'),
       isPartner ? Promise.resolve([]) : User.find().select('createdAt'),
       isPartner ? Promise.resolve([]) : Visit.find().select('createdAt path sessionId'),
+      isPartner ? Promise.resolve([]) : ChatHistory.find().select('messages createdAt updatedAt'),
+      isAdmin ? AdminLog.find().select('action resource actorName createdAt').sort('-createdAt').limit(8) : Promise.resolve([]),
     ]);
 
     const now = new Date();
@@ -154,6 +159,8 @@ exports.getDashboardOverview = async (req, res) => {
       totalContacts: contacts.length,
       totalVisits: visits.length,
       uniqueVisitors: new Set(visits.map((visit) => visit.sessionId).filter(Boolean)).size,
+      chatSessions: chatSessions.length,
+      chatMessages: chatSessions.reduce((sum, session) => sum + (session.messages?.length || 0), 0),
     };
 
     const bookingStatuses = {
@@ -228,6 +235,7 @@ exports.getDashboardOverview = async (req, res) => {
           unhandledContacts: contacts.filter((contact) => contact.trangThai === 'Chưa xử lý').length,
           visitsToday: visits.filter((visit) => isSameDay(visit.createdAt, now)).length,
           visitTrend,
+          recentAdminLogs: adminLogs,
         },
         recentContacts,
         recentBookings,

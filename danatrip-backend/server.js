@@ -31,6 +31,7 @@ app.use('/api/users', require('./routes/userRoutes'));
 app.use('/api/payment', require('./routes/payment'));
 app.use('/api/dashboard', require('./routes/dashboard'));
 app.use('/api/analytics', require('./routes/analytics'));
+app.use('/api/admin-logs', require('./routes/adminLog'));
 
 // Health check
 app.get('/', (req, res) => {
@@ -49,6 +50,7 @@ app.get('/', (req, res) => {
       upload: '/api/upload',
       dashboard: '/api/dashboard',
       analytics: '/api/analytics',
+      adminLogs: '/api/admin-logs',
     },
   });
 });

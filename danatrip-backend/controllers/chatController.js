@@ -3,6 +3,7 @@ const ChatHistory = require('../models/ChatHistory');
 const Tour = require('../models/Tour');
 const Place = require('../models/Place');
 const Food = require('../models/Food');
+const KnowledgeBase = require('../models/KnowledgeBase');
 
 // Khởi tạo Gemini AI
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
@@ -15,6 +16,48 @@ Nhiệm vụ:
 - Trả lời bằng tiếng Việt, thân thiện và chi tiết
 - Khi gợi ý tour/địa điểm/món ăn, hãy đề cập tên cụ thể để hệ thống có thể liên kết
 - Nếu câu hỏi không liên quan đến du lịch Đà Nẵng, hãy lịch sự chuyển hướng về chủ đề du lịch`;
+
+const normalizeQuestion = (text = '') =>
+  text
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, ' ')
+    .slice(0, 180);
+
+const learnFromChat = async ({ message, aiResponse, sessionId }) => {
+  const question = (message || '').trim();
+  const answer = (aiResponse || '').trim();
+
+  if (question.length < 12 || answer.length < 24) return;
+
+  const normalizedQuestion = normalizeQuestion(question);
+  const existing = await KnowledgeBase.findOne({
+    source: 'chat',
+    sourceRef: normalizedQuestion,
+  });
+
+  if (existing) {
+    existing.answer = answer;
+    existing.usageCount += 1;
+    existing.priority = Math.min(existing.priority + 1, 5);
+    existing.updatedAt = new Date();
+    await existing.save();
+    return;
+  }
+
+  await KnowledgeBase.create({
+    title: question.slice(0, 90),
+    category: 'ai-training',
+    question,
+    answer,
+    tags: ['auto-learn', 'chat'],
+    status: 'active',
+    source: 'chat',
+    sourceRef: normalizedQuestion || sessionId,
+    priority: 2,
+    usageCount: 1,
+  });
+};
 
 // @desc    Gửi tin nhắn cho AI
 // @route   POST /api/chat
@@ -30,10 +73,11 @@ exports.sendMessage = async (req, res) => {
     }
 
     // Lấy dữ liệu thực từ DB để AI tham khảo
-    const [tours, places, foods] = await Promise.all([
+    const [tours, places, foods, knowledgeItems] = await Promise.all([
       Tour.find({ hienThi: true }).select('tenTour moTaNgan giaNguoiLon').limit(20),
       Place.find({ hienThi: true }).select('tenDiaDiem noiDung viTri').limit(20),
       Food.find({ hienThi: true }).select('tenMon moTa').limit(20),
+      KnowledgeBase.find({ status: 'active' }).select('title category question answer tags priority').sort({ priority: -1, updatedAt: -1 }).limit(20),
     ]);
 
     // Tạo context từ dữ liệu thực
@@ -46,6 +90,9 @@ ${places.map((p) => `- ${p.tenDiaDiem} (${p.viTri}): ${p.noiDung}`).join('\n')}
 
 DANH SÁCH MÓN ĂN:
 ${foods.map((f) => `- ${f.tenMon}: ${f.moTa}`).join('\n')}
+
+KNOWLEDGE BASE ĐÃ DUYỆT:
+${knowledgeItems.map((item) => `- [${item.category}] ${item.title}: ${item.question ? `${item.question} => ` : ''}${item.answer}`).join('\n')}
 `;
 
     // Lấy lịch sử chat (nếu có sessionId)
@@ -119,6 +166,12 @@ ${foods.map((f) => `- ${f.tenMon}: ${f.moTa}`).join('\n')}
         messages: [newMessage],
       });
     }
+
+    await learnFromChat({
+      message,
+      aiResponse,
+      sessionId: currentSessionId,
+    });
 
     res.status(200).json({
       success: true,

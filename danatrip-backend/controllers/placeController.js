@@ -12,7 +12,7 @@ exports.getPlaces = async (req, res) => {
     }
 
     const places = await Place.find(query)
-      .select('tenDiaDiem noiDung hinhAnhChinh viTri')
+      .select('tenDiaDiem noiDung hinhAnhChinh viTri hienThi')
       .sort('-createdAt');
 
     res.status(200).json({

@@ -1,13 +1,15 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import API from '../../api/axios';
 import Loading from '../../components/common/Loading';
 import { toast } from 'react-toastify';
-import { FaPlus, FaEdit, FaTrash } from 'react-icons/fa';
+import { FaPlus, FaEdit, FaTrash, FaSearch } from 'react-icons/fa';
+import { getImageUrl } from '../../utils/image';
 
 const AdminFoods = () => {
   const [foods, setFoods] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
 
   const fetchFoods = async () => {
     try {
@@ -22,13 +24,24 @@ const AdminFoods = () => {
 
   useEffect(() => { fetchFoods(); }, []);
 
+  const filteredFoods = useMemo(() => {
+    const keyword = search.trim().toLowerCase();
+    if (!keyword) return foods;
+
+    return foods.filter((food) => [
+      food.tenMon,
+      food.moTa,
+      food.hienThi ? 'hiện hien' : 'ẩn an',
+    ].some((value) => String(value || '').toLowerCase().includes(keyword)));
+  }, [foods, search]);
+
   const handleDelete = async (id, name) => {
     if (!window.confirm(`Xác nhận xóa món "${name}"?`)) return;
     try {
       await API.delete(`/foods/${id}`);
       toast.success('Đã xóa món ăn');
       fetchFoods();
-    } catch (error) {
+    } catch {
       toast.error('Xóa thất bại');
     }
   };
@@ -44,6 +57,18 @@ const AdminFoods = () => {
         </Link>
       </div>
 
+      <div className="admin-search-bar">
+        <div className="search-input-wrap">
+          <FaSearch className="search-icon" />
+          <input
+            type="text"
+            placeholder="Tìm theo tên món, mô tả..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
+      </div>
+
       <table className="admin-table full">
         <thead>
           <tr>
@@ -56,10 +81,10 @@ const AdminFoods = () => {
           </tr>
         </thead>
         <tbody>
-          {foods.map((food, i) => (
+          {filteredFoods.map((food, i) => (
             <tr key={food._id}>
               <td>{i + 1}</td>
-              <td><img src={food.hinhAnh || '/images/placeholder.jpg'} alt="" className="table-img" /></td>
+              <td><img src={getImageUrl(food.hinhAnh)} alt={food.tenMon} className="table-img" /></td>
               <td><strong>{food.tenMon}</strong></td>
               <td>{food.moTa?.substring(0, 50)}...</td>
               <td>
@@ -75,7 +100,7 @@ const AdminFoods = () => {
               </td>
             </tr>
           ))}
-          {foods.length === 0 && <tr><td colSpan={6} className="empty">Chưa có món ăn nào</td></tr>}
+          {filteredFoods.length === 0 && <tr><td colSpan={6} className="empty">Không tìm thấy món ăn phù hợp</td></tr>}
         </tbody>
       </table>
     </div>

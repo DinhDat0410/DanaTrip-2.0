@@ -11,6 +11,8 @@ import {
   FaUserFriends,
   FaUsers,
   FaEye,
+  FaHistory,
+  FaComments,
 } from 'react-icons/fa';
 import API from '../../api/axios';
 import Loading from '../../components/common/Loading';
@@ -26,6 +28,7 @@ const periodOptions = [
 const Dashboard = () => {
   const { user } = useAuth();
   const isPartner = user?.vaiTro === 'Partner';
+  const isAdmin = user?.vaiTro === 'Admin';
   const [loading, setLoading] = useState(true);
   const [period, setPeriod] = useState('monthly');
   const [dashboard, setDashboard] = useState(null);
@@ -82,6 +85,15 @@ const Dashboard = () => {
     },
   ];
 
+  if (isAdmin || (!isPartner && dashboard.stats?.chatSessions !== undefined)) {
+    summaryCards.push({
+      icon: <FaComments />,
+      title: 'Phiên chat AI',
+      value: dashboard.stats?.chatSessions || 0,
+      tone: 'chat-icon',
+    });
+  }
+
   const widgets = [];
 
   if (!isPartner) {
@@ -104,11 +116,13 @@ const Dashboard = () => {
   return (
     <div className="admin-page">
       <div className="admin-header">
-        <h1>{isPartner ? '📊 Dashboard đối tác' : '📊 Dashboard vận hành'}</h1>
+        <h1>{isPartner ? '📊 Dashboard đối tác' : isAdmin ? '📊 Dashboard admin' : '📊 Dashboard vận hành'}</h1>
         <p>
           {isPartner
             ? 'Theo dõi hiệu quả kinh doanh và booking của tour thuộc doanh nghiệp của bạn.'
-            : 'Tổng quan doanh thu, hiệu suất booking, đối tác và hoạt động hệ thống.'}
+            : isAdmin
+              ? 'Tổng quan tài khoản, thay đổi hệ thống, tri thức AI và hoạt động vận hành web.'
+              : 'Tổng quan doanh thu, hiệu suất booking, đối tác và hoạt động hệ thống.'}
         </p>
       </div>
 
@@ -272,6 +286,27 @@ const Dashboard = () => {
           )}
         </section>
       </div>
+
+      {isAdmin && (
+        <section className="db-panel db-admin-ops">
+          <div className="table-header">
+            <h2><FaHistory /> Hoạt động quản trị gần đây</h2>
+            <Link to="/admin/admin-logs">Xem admin log →</Link>
+          </div>
+          <div className="db-log-list">
+            {(dashboard.widgets?.recentAdminLogs || []).map((log) => (
+              <div className="db-log-item" key={log._id}>
+                <span>{new Date(log.createdAt).toLocaleString('vi-VN')}</span>
+                <strong>{log.actorName}</strong>
+                <p>{log.action} {log.resource}</p>
+              </div>
+            ))}
+            {(dashboard.widgets?.recentAdminLogs || []).length === 0 && (
+              <p className="empty">Chưa có hoạt động quản trị</p>
+            )}
+          </div>
+        </section>
+      )}
 
       <div className="db-bottom">
         {!isPartner && (

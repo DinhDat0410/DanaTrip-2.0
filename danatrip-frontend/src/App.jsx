@@ -45,6 +45,7 @@ import AdminContacts from './pages/admin/AdminContact';
 import AdminUsers from './pages/admin/AdminUser';
 import AdminUserEdit from './pages/admin/AdminUserEdit';
 import AdminChatHistory from './pages/admin/AdminChatHistory';
+import AdminLog from './pages/admin/AdminLog';
 
 function App() {
   return (
@@ -78,7 +79,7 @@ function App() {
           {/* Admin */}
           <Route path="/admin" element={<ProtectedRoute allowedRoles={['Admin', 'WebsiteManager', 'Partner']}><AdminLayout /></ProtectedRoute>}>
             <Route index element={<AdminHomeRedirect />} />
-            <Route path="dashboard" element={<ProtectedRoute allowedRoles={['WebsiteManager', 'Partner']}><Dashboard /></ProtectedRoute>} />
+            <Route path="dashboard" element={<ProtectedRoute allowedRoles={['Admin', 'WebsiteManager', 'Partner']}><Dashboard /></ProtectedRoute>} />
             <Route path="places" element={<ProtectedRoute allowedRoles={['WebsiteManager']}><AdminPlaces /></ProtectedRoute>} />
             <Route path="places/new" element={<ProtectedRoute allowedRoles={['WebsiteManager']}><AdminPlaceEdit /></ProtectedRoute>} />
             <Route path="places/edit/:id" element={<ProtectedRoute allowedRoles={['WebsiteManager']}><AdminPlaceEdit /></ProtectedRoute>} />
@@ -92,6 +93,7 @@ function App() {
             <Route path="reviews" element={<ProtectedRoute allowedRoles={['WebsiteManager']}><AdminReviews /></ProtectedRoute>} />
             <Route path="contacts" element={<ProtectedRoute allowedRoles={['WebsiteManager']}><AdminContacts /></ProtectedRoute>} />
             <Route path="chat-history" element={<ProtectedRoute allowedRoles={['WebsiteManager']}><AdminChatHistory /></ProtectedRoute>} />
+            <Route path="admin-logs" element={<ProtectedRoute allowedRoles={['Admin']}><AdminLog /></ProtectedRoute>} />
             <Route path="users" element={<ProtectedRoute allowedRoles={['Admin']}><AdminUsers /></ProtectedRoute>} />
             <Route path="users/new" element={<ProtectedRoute allowedRoles={['Admin']}><AdminUserEdit /></ProtectedRoute>} />
             <Route path="users/edit/:id" element={<ProtectedRoute allowedRoles={['Admin']}><AdminUserEdit /></ProtectedRoute>} />

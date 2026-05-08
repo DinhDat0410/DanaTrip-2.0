@@ -12,6 +12,7 @@ import {
   FaUsers,
   FaArrowLeft,
   FaSignOutAlt,
+  FaHistory,
 } from 'react-icons/fa';
 import '../../styles/adminLayout.css';
 
@@ -22,7 +23,9 @@ const AdminLayout = () => {
 
   const menuByRole = {
     Admin: [
+      { path: '/admin/dashboard', icon: <FaChartBar />, label: 'Dashboard' },
       { path: '/admin/users', icon: <FaUsers />, label: 'Người dùng' },
+      { path: '/admin/admin-logs', icon: <FaHistory />, label: 'Admin log' },
     ],
     WebsiteManager: [
       { path: '/admin/dashboard', icon: <FaChartBar />, label: 'Dashboard' },

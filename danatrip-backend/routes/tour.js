@@ -11,6 +11,7 @@ const {
 } = require('../controllers/tourController');
 const { protect } = require('../middleware/auth');
 const { allowRoles } = require('../middleware/admin');
+const adminLogger = require('../middleware/adminLogger');
 
 // Public
 router.get('/', getTours);
@@ -19,8 +20,8 @@ router.get('/manage/all', protect, allowRoles('WebsiteManager', 'Partner'), getM
 router.get('/:id', getTour);
 
 // Quản trị tour
-router.post('/', protect, allowRoles('WebsiteManager', 'Partner'), createTour);
-router.put('/:id', protect, allowRoles('WebsiteManager', 'Partner'), updateTour);
-router.delete('/:id', protect, allowRoles('WebsiteManager', 'Partner'), deleteTour);
+router.post('/', protect, allowRoles('WebsiteManager', 'Partner'), adminLogger('create', 'tour'), createTour);
+router.put('/:id', protect, allowRoles('WebsiteManager', 'Partner'), adminLogger('update', 'tour'), updateTour);
+router.delete('/:id', protect, allowRoles('WebsiteManager', 'Partner'), adminLogger('delete', 'tour'), deleteTour);
 
 module.exports = router;
