@@ -1,10 +1,14 @@
 const multer = require('multer');
 const path = require('path');
+const fs = require('fs');
+
+const uploadDir = path.join(__dirname, '..', 'uploads');
 
 // Cấu hình lưu file
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, 'uploads/');
+    fs.mkdirSync(uploadDir, { recursive: true });
+    cb(null, uploadDir);
   },
   filename: (req, file, cb) => {
     // Tạo tên file unique: timestamp + random + extension
@@ -20,7 +24,7 @@ const fileFilter = (req, file, cb) => {
   if (allowedTypes.includes(file.mimetype)) {
     cb(null, true);
   } else {
-    cb(new Error('Chỉ cho phép upload file ���nh (jpg, png, gif, webp)'), false);
+    cb(new Error('Chỉ cho phép upload file ảnh (jpg, png, gif, webp)'), false);
   }
 };
 

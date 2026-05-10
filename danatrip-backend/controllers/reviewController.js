@@ -166,10 +166,10 @@ exports.deleteReview = async (req, res) => {
       });
     }
 
-    // Kiểm tra quyền: chủ đánh giá hoặc Admin
+    // Kiểm tra quyền: chủ đánh giá hoặc nhóm quản trị
     if (
       review.user.toString() !== req.user._id.toString() &&
-      req.user.vaiTro !== 'Admin'
+      !['Admin', 'WebsiteManager'].includes(req.user.vaiTro)
     ) {
       return res.status(403).json({
         success: false,

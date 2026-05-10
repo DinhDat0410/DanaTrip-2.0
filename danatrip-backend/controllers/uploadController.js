@@ -64,7 +64,8 @@ exports.uploadMultipleImages = (req, res) => {
 // @route   DELETE /api/upload/:filename
 exports.deleteImage = (req, res) => {
   try {
-    const filePath = path.join(__dirname, '..', 'uploads', req.params.filename);
+    const filename = path.basename(req.params.filename);
+    const filePath = path.join(__dirname, '..', 'uploads', filename);
 
     if (!fs.existsSync(filePath)) {
       return res.status(404).json({

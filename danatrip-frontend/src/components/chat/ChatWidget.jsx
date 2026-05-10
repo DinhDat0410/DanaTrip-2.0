@@ -66,7 +66,7 @@ const ChatWidget = () => {
     };
 
     loadSavedChat();
-  }, []);
+  }, [sessionId]);
 
   const persistSession = (newSessionId) => {
     if (!newSessionId) return;

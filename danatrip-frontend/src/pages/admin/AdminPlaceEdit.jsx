@@ -42,7 +42,7 @@ const AdminPlaceEdit = () => {
             thongTin: data.thongTin || [],
             view360: data.view360 || [],
           });
-        } catch (error) {
+        } catch {
           toast.error("Không tìm thấy địa điểm");
           navigate("/admin/places");
         } finally {

@@ -17,7 +17,7 @@ const AdminChatHistory = () => {
       const data = res.data.data || [];
       setSessions(data);
       setSelectedSessionId((current) => current || data[0]?.sessionId || '');
-    } catch (error) {
+    } catch {
       toast.error('Không tải được lịch sử chat');
     } finally {
       setLoading(false);
@@ -55,7 +55,7 @@ const AdminChatHistory = () => {
         setSelectedSessionId(next[0]?.sessionId || '');
         return next;
       });
-    } catch (error) {
+    } catch {
       toast.error('Xóa lịch sử chat thất bại');
     }
   };

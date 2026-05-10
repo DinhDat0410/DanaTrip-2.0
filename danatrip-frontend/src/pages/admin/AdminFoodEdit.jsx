@@ -61,7 +61,7 @@ const AdminFoodEdit = () => {
             quyTrinh: data.quyTrinh || [],
             quanAn: data.quanAn || [],
           });
-        } catch (error) {
+        } catch {
           toast.error("Không tìm thấy món ăn");
           navigate("/admin/foods");
         } finally {

@@ -1,7 +1,6 @@
-import { createContext, useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import API from '../api/axios';
-
-export const AuthContext = createContext();
+import { AuthContext } from './AuthContextDefinition';
 
 export const AuthProvider = ({ children }) => {
   const adminPanelRoles = ['Admin', 'WebsiteManager', 'Partner'];

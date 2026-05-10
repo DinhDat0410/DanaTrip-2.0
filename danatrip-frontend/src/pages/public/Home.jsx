@@ -11,6 +11,10 @@ const heroImages = [
   "../../images/danang-hero3.jpg",
 ];
 
+const getRandomItems = (items = [], count = 4) => {
+  return [...items].sort(() => Math.random() - 0.5).slice(0, count);
+};
+
 const Home = () => {
   const [places, setPlaces] = useState([]);
   const [tours, setTours] = useState([]);
@@ -35,9 +39,9 @@ const Home = () => {
           API.get("/tours"),
           API.get("/foods"),
         ]);
-        setPlaces(placesRes.data.data?.slice(0, 4) || []);
-        setTours(toursRes.data.data?.slice(0, 4) || []);
-        setFoods(foodsRes.data.data?.slice(0, 4) || []);
+        setPlaces(getRandomItems(placesRes.data.data));
+        setTours(getRandomItems(toursRes.data.data));
+        setFoods(getRandomItems(foodsRes.data.data));
 
         // Load public reviews for home page (gracefully ignore auth errors)
         try {

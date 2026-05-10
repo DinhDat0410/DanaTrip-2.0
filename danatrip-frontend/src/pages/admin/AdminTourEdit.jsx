@@ -79,7 +79,7 @@ const AdminTourEdit = () => {
             baoGom: data.baoGom || [],
           });
         }
-      } catch (error) {
+      } catch {
         toast.error('Lỗi tải dữ liệu');
         navigate('/admin/tours');
       } finally {

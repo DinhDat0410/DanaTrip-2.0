@@ -48,7 +48,7 @@ const ImageUpload = ({ value, onChange, label = 'Hình ảnh' }) => {
       const filename = value.split('/').pop();
       try {
         await API.delete(`/upload/${filename}`);
-      } catch (error) {
+      } catch {
         // Bỏ qua lỗi xóa file
       }
     }

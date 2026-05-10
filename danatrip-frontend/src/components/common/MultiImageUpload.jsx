@@ -36,7 +36,7 @@ const MultiImageUpload = ({ value = [], onChange, label = 'Album ảnh', max = 1
       const filename = image.urlAnh.split('/').pop();
       try {
         await API.delete(`/upload/${filename}`);
-      } catch (error) {
+      } catch {
         // Bỏ qua
       }
     }
