@@ -66,8 +66,6 @@ app.listen(PORT, () => {
   console.log(`📖 Environment: ${process.env.NODE_ENV}\n`);
 });
 
-const cors = require('cors');
-
 app.use(cors({
   origin: 'https://danatrip-frontend.onrender.com',
   credentials: true
