@@ -33,9 +33,13 @@ const MultiImageUpload = ({ value = [], onChange, label = 'Album ảnh', max = 1
   const handleRemove = async (index) => {
     const image = value[index];
     if (image?.urlAnh) {
-      const filename = image.urlAnh.split('/').pop();
       try {
-        await API.delete(`/upload/${filename}`);
+        if (image.urlAnh.startsWith('http')) {
+          await API.delete('/upload', { params: { url: image.urlAnh } });
+        } else {
+          const filename = image.urlAnh.split('/').pop();
+          await API.delete(`/upload/${filename}`);
+        }
       } catch {
         // Bỏ qua
       }

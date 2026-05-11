@@ -36,6 +36,9 @@ router.post('/', protect, allowRoles('WebsiteManager', 'Partner'), handleMulterE
 // Upload nhiều ảnh (Admin)
 router.post('/multiple', protect, allowRoles('WebsiteManager', 'Partner'), handleMulterError(uploadMultiple), uploadMultipleImages);
 
+// Xóa ảnh cloudinary theo query ?publicId=... hoặc ?url=...
+router.delete('/', protect, allowRoles('WebsiteManager', 'Partner'), deleteImage);
+
 // Xóa ảnh (Admin)
 router.delete('/:filename', protect, allowRoles('WebsiteManager', 'Partner'), deleteImage);
 

@@ -44,10 +44,13 @@ const ImageUpload = ({ value, onChange, label = 'Hình ảnh' }) => {
 
   const handleRemove = async () => {
     if (value) {
-      // Xóa file trên server
-      const filename = value.split('/').pop();
       try {
-        await API.delete(`/upload/${filename}`);
+        if (value.startsWith('http')) {
+          await API.delete('/upload', { params: { url: value } });
+        } else {
+          const filename = value.split('/').pop();
+          await API.delete(`/upload/${filename}`);
+        }
       } catch {
         // Bỏ qua lỗi xóa file
       }
