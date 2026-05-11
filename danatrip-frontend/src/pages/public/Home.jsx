@@ -5,11 +5,19 @@ import Card from "../../components/common/Card";
 import Loading from "../../components/common/Loading";
 import "../../styles/home.css";
 
-const heroImages = [
-  "../../images/danang-hero.jpg",
-  "../../images/danang-hero2.jpg",
-  "../../images/danang-hero3.jpg",
+const fallbackHeroImages = [
+  "/images/danang-hero.jpg",
+  "/images/danang-hero2.jpg",
+  "/images/danang-hero3.jpg",
 ];
+
+const heroImages = [
+  import.meta.env.VITE_HERO_IMAGE_1,
+  import.meta.env.VITE_HERO_IMAGE_2,
+  import.meta.env.VITE_HERO_IMAGE_3,
+].filter((url) => typeof url === "string" && url.trim() !== "");
+
+const resolvedHeroImages = heroImages.length > 0 ? heroImages : fallbackHeroImages;
 
 const getRandomItems = (items = [], count = 4) => {
   return [...items].sort(() => Math.random() - 0.5).slice(0, count);
@@ -26,7 +34,7 @@ const Home = () => {
   // Cycle hero background images
   useEffect(() => {
     const interval = setInterval(() => {
-      setHeroIndex((prev) => (prev + 1) % heroImages.length);
+      setHeroIndex((prev) => (prev + 1) % resolvedHeroImages.length);
     }, 4000);
     return () => clearInterval(interval);
   }, []);
@@ -67,7 +75,7 @@ const Home = () => {
       <section
         className="hero"
         style={{
-          backgroundImage: `linear-gradient(135deg, rgba(0,0,0,0.5), rgba(0,0,0,0.28)), url('${heroImages[heroIndex]}')`,
+          backgroundImage: `linear-gradient(135deg, rgba(0,0,0,0.5), rgba(0,0,0,0.28)), url('${resolvedHeroImages[heroIndex]}')`,
         }}
       >
         <div className="hero-content">
@@ -80,7 +88,7 @@ const Home = () => {
           </Link>
         </div>
         <div className="hero-dots">
-          {heroImages.map((_, i) => (
+          {resolvedHeroImages.map((_, i) => (
             <button
               key={i}
               className={`hero-dot${i === heroIndex ? " active" : ""}`}
