@@ -44,14 +44,7 @@ export const AuthProvider = ({ children }) => {
   // Đăng ký
   const register = async (hoTen, email, matKhau) => {
     const res = await API.post('/auth/register', { hoTen, email, matKhau });
-    const { token: newToken, user: userData } = res.data;
-
-    localStorage.setItem('token', newToken);
-    localStorage.setItem('user', JSON.stringify(userData));
-    setToken(newToken);
-    setUser(userData);
-
-    return userData;
+    return res.data;
   };
 
   // Đăng nhập bằng mạng xã hội

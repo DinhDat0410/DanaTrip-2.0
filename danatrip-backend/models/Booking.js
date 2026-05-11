@@ -31,7 +31,7 @@ const BookingSchema = new mongoose.Schema(
     paymentUpdatedAt: { type: Date, default: null },
     trangThai: {
       type: String,
-      enum: ['Chờ xác nhận', 'Đã xác nhận', 'Đã thanh toán', 'Đã hủy'],
+      enum: ['Chờ xác nhận', 'Đã xác nhận', 'Đã thanh toán', 'Đang hoàn tiền', 'Đã hoàn tiền', 'Đã hủy'],
       default: 'Chờ xác nhận',
     },
     ghiChu: { type: String, default: '' },

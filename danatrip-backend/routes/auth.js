@@ -9,6 +9,8 @@ const {
   resetPassword,
   updateProfile,
   changePassword,
+  verifyEmail,
+  resendVerificationEmail,
   requestEmailChange,
   confirmEmailChange,
 } = require('../controllers/authController');
@@ -17,6 +19,8 @@ const { protect } = require('../middleware/auth');
 router.post('/register', register);
 router.post('/login', login);
 router.post('/social-login', socialLogin);
+router.get('/verify-email/:token', verifyEmail);
+router.post('/resend-verification-email', resendVerificationEmail);
 router.post('/forgot-password', forgotPassword);
 router.put('/reset-password/:token', resetPassword);
 router.get('/me', protect, getMe);

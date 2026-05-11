@@ -161,6 +161,8 @@ const Profile = () => {
       case 'Chờ xác nhận': return 'pending';
       case 'Đã xác nhận': return 'confirmed';
       case 'Đã thanh toán': return 'paid';
+      case 'Đang hoàn tiền': return 'pending';
+      case 'Đã hoàn tiền': return 'cancelled';
       case 'Đã hủy': return 'cancelled';
       default: return '';
     }
@@ -366,16 +368,18 @@ const Profile = () => {
                       </div>
 
                       <div className="booking-card-body">
+                        <p>🆔 Mã đặt tour: {booking._id}</p>
                         <p>👤 {booking.hoTen}</p>
                         <p>👥 {booking.soNguoiLon} người lớn, {booking.soTreEm} trẻ em</p>
                         <p>💰 {booking.tongTien?.toLocaleString('vi-VN')}đ</p>
                         <p>💳 {booking.phuongThucThanhToan}</p>
+                        <p>🚍 Khởi hành: {booking.tour?.ngayKhoiHanh ? new Date(booking.tour.ngayKhoiHanh).toLocaleDateString('vi-VN') : 'Chưa cập nhật'}</p>
                         <p>📅 {new Date(booking.createdAt).toLocaleDateString('vi-VN')}</p>
                         {booking.ghiChu && <p>📝 {booking.ghiChu}</p>}
                       </div>
 
                       <div className="booking-card-actions">
-                        {booking.trangThai === 'Chờ xác nhận' && (
+                        {['Chờ xác nhận', 'Đã xác nhận'].includes(booking.trangThai) && (
                           <button
                             className="btn-cancel"
                             onClick={() => handleCancelBooking(booking._id)}

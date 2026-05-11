@@ -65,6 +65,49 @@
   text-decoration: underline;
 }
 
+.auth-notice {
+  background: #ecfeff;
+  border: 1px solid #99f6e4;
+  border-radius: var(--radius-md);
+  color: #115e59;
+  line-height: 1.5;
+  margin-bottom: 1.25rem;
+  padding: 1rem;
+  text-align: center;
+}
+
+.auth-notice p {
+  margin: 0 0 0.75rem;
+}
+
+.auth-link-button {
+  background: transparent;
+  border: 0;
+  color: var(--primary);
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
+  padding: 0;
+}
+
+.auth-link-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.auth-result {
+  line-height: 1.6;
+  text-align: center;
+}
+
+.auth-result.success {
+  color: #0f766e;
+}
+
+.auth-result.error {
+  color: #b91c1c;
+}
+
 .social-divider {
   text-align: center;
   margin: 1.5rem 0;

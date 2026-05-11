@@ -77,6 +77,36 @@ const sendBookingConfirmationEmail = async (booking) => {
   return sendMail(booking.email, subject, html);
 };
 
+const sendBookingStatusUpdateEmail = async (booking) => {
+  if (!booking?.email) {
+    return null;
+  }
+
+  const tourName = booking.tour?.tenTour || 'Tour đã đặt';
+  const bookingCode = booking._id?.toString() || '';
+  const departureDate = formatDate(booking.tour?.ngayKhoiHanh);
+  const subject = `DANATrip - Cập nhật trạng thái booking ${bookingCode}`.trim();
+  const html = `
+    <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #1f2937; max-width: 640px; margin: 0 auto;">
+      <h2 style="color: #0f766e;">Booking của bạn đã được cập nhật</h2>
+      <p>Xin chào <strong>${booking.hoTen || 'bạn'}</strong>,</p>
+      <p>Trạng thái booking tại <strong>DANATrip</strong> đã thay đổi.</p>
+      <div style="background: #f8fafc; border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; margin: 20px 0;">
+        <p><strong>Mã booking:</strong> ${bookingCode}</p>
+        <p><strong>Tên tour:</strong> ${tourName}</p>
+        <p><strong>Ngày khởi hành:</strong> ${departureDate}</p>
+        <p><strong>Trạng thái mới:</strong> ${booking.trangThai}</p>
+        <p><strong>Tổng tiền:</strong> ${formatCurrency(booking.tongTien)}đ</p>
+        <p><strong>Phương thức thanh toán:</strong> ${booking.phuongThucThanhToan || 'Cash'}</p>
+      </div>
+      <p>Nếu cần hỗ trợ thêm, vui lòng phản hồi email này hoặc liên hệ DANATrip.</p>
+      <p>Trân trọng,<br /><strong>DANATrip</strong></p>
+    </div>
+  `;
+
+  return sendMail(booking.email, subject, html);
+};
+
 const sendResetPasswordEmail = async ({ email, hoTen, resetUrl }) => {
   if (!email) {
     return null;
@@ -97,6 +127,33 @@ const sendResetPasswordEmail = async ({ email, hoTen, resetUrl }) => {
       <p>Nếu nút không hoạt động, bạn có thể copy link này vào trình duyệt:</p>
       <p style="word-break: break-all;"><a href="${resetUrl}">${resetUrl}</a></p>
       <p>Nếu bạn không yêu cầu đổi mật khẩu, hãy bỏ qua email này.</p>
+      <p>Trân trọng,<br /><strong>DANATrip</strong></p>
+    </div>
+  `;
+
+  return sendMail(email, subject, html);
+};
+
+const sendEmailVerificationEmail = async ({ email, hoTen, verificationUrl }) => {
+  if (!email) {
+    return null;
+  }
+
+  const subject = 'DANATrip - Xác nhận tài khoản';
+  const html = `
+    <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #1f2937; max-width: 640px; margin: 0 auto;">
+      <h2 style="color: #0f766e;">Xác nhận tài khoản DANATrip</h2>
+      <p>Xin chào <strong>${hoTen || 'bạn'}</strong>,</p>
+      <p>Cảm ơn bạn đã đăng ký tài khoản DANATrip. Hãy bấm vào nút bên dưới để xác nhận email.</p>
+      <p>Link này có hiệu lực trong <strong>24 giờ</strong>.</p>
+      <p style="margin: 24px 0;">
+        <a href="${verificationUrl}" style="display: inline-block; background: #0f766e; color: #ffffff; text-decoration: none; padding: 12px 20px; border-radius: 8px; font-weight: bold;">
+          Xác nhận tài khoản
+        </a>
+      </p>
+      <p>Nếu nút không hoạt động, bạn có thể copy link này vào trình duyệt:</p>
+      <p style="word-break: break-all;"><a href="${verificationUrl}">${verificationUrl}</a></p>
+      <p>Nếu bạn không đăng ký tài khoản DANATrip, hãy bỏ qua email này.</p>
       <p>Trân trọng,<br /><strong>DANATrip</strong></p>
     </div>
   `;
@@ -129,6 +186,8 @@ module.exports = {
   hasMailConfig,
   sendMail,
   sendBookingConfirmationEmail,
+  sendBookingStatusUpdateEmail,
   sendResetPasswordEmail,
+  sendEmailVerificationEmail,
   sendEmailChangeCode,
 };

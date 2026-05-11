@@ -1,6 +1,10 @@
 const Booking = require('../models/Booking');
 const Tour = require('../models/Tour');
-const { hasMailConfig, sendBookingConfirmationEmail } = require('../utils/mailer');
+const {
+  hasMailConfig,
+  sendBookingConfirmationEmail,
+  sendBookingStatusUpdateEmail,
+} = require('../utils/mailer');
 
 // @desc    Tạo booking mới (User)
 // @route   POST /api/bookings
@@ -164,8 +168,23 @@ exports.updateBooking = async (req, res) => {
       });
     }
 
-    // Nếu hủy booking → trả lại số chỗ cho tour
-    if (trangThai === 'Đã hủy' && booking.trangThai !== 'Đã hủy') {
+    const previousStatus = booking.trangThai;
+    let nextStatus = trangThai;
+
+    if (previousStatus === 'Đã thanh toán' && trangThai === 'Đã hủy') {
+      nextStatus = 'Đang hoàn tiền';
+    }
+
+    if (nextStatus === 'Đã hoàn tiền' && previousStatus !== 'Đang hoàn tiền') {
+      return res.status(400).json({
+        success: false,
+        message: 'Chỉ có thể chuyển sang "Đã hoàn tiền" từ trạng thái "Đang hoàn tiền"',
+      });
+    }
+
+    // Nếu booking vào trạng thái hủy/hoàn tiền lần đầu → trả lại số chỗ cho tour
+    const releasingStatuses = ['Đã hủy', 'Đang hoàn tiền', 'Đã hoàn tiền'];
+    if (releasingStatuses.includes(nextStatus) && !releasingStatuses.includes(previousStatus)) {
       const tour = await Tour.findById(booking.tour);
       if (tour) {
         tour.soChoDaDat -= booking.soNguoiLon + booking.soTreEm;
@@ -174,8 +193,26 @@ exports.updateBooking = async (req, res) => {
       }
     }
 
-    booking.trangThai = trangThai;
+    booking.trangThai = nextStatus;
     await booking.save();
+
+    const shouldSendStatusUpdateEmail =
+      booking.email &&
+      previousStatus !== nextStatus &&
+      ['Đã xác nhận', 'Đã thanh toán', 'Đang hoàn tiền', 'Đã hoàn tiền', 'Đã hủy'].includes(nextStatus);
+
+    if (shouldSendStatusUpdateEmail) {
+      try {
+        const populatedBooking = await Booking.findById(booking._id)
+          .populate('tour', 'tenTour ngayKhoiHanh');
+        await sendBookingStatusUpdateEmail(populatedBooking);
+      } catch (mailError) {
+        console.error('Khong gui duoc email cap nhat trang thai booking:', mailError.message);
+        if (!hasMailConfig) {
+          console.warn('Email config chua day du. Kiem tra EMAIL_USER va EMAIL_PASS trong .env');
+        }
+      }
+    }
 
     res.status(200).json({ success: true, data: booking });
   } catch (error) {
@@ -207,8 +244,8 @@ exports.cancelBooking = async (req, res) => {
       });
     }
 
-    // Chỉ hủy được khi đang ở trạng thái Chờ xác nhận
-    if (booking.trangThai !== 'Chờ xác nhận') {
+    // User chỉ hủy được khi đang ở trạng thái Chờ xác nhận hoặc Đã xác nhận
+    if (!['Chờ xác nhận', 'Đã xác nhận'].includes(booking.trangThai)) {
       return res.status(400).json({
         success: false,
         message: `Không thể hủy booking ở trạng thái "${booking.trangThai}"`,

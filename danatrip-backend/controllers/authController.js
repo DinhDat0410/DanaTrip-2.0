@@ -1,8 +1,26 @@
 const User = require('../models/User');
 const crypto = require('crypto');
-const { hasMailConfig, sendResetPasswordEmail, sendEmailChangeCode } = require('../utils/mailer');
+const {
+  hasMailConfig,
+  sendResetPasswordEmail,
+  sendEmailVerificationEmail,
+  sendEmailChangeCode,
+} = require('../utils/mailer');
 
 const emailRegex = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
+const isStrongPassword = (password = '') => {
+  const value = String(password);
+  return (
+    value.length >= 8 &&
+    /[A-Z]/.test(value) &&
+    /[a-z]/.test(value) &&
+    /\d/.test(value) &&
+    /[^A-Za-z0-9]/.test(value)
+  );
+};
+
+const passwordSuggestion =
+  'Mật khẩu chưa đủ mạnh. Gợi ý: tối thiểu 8 ký tự, gồm chữ hoa, chữ thường, số và ký tự đặc biệt.';
 
 const buildUserResponse = (user) => ({
   id: user._id,
@@ -13,43 +31,92 @@ const buildUserResponse = (user) => ({
   avatar: user.avatar,
   vaiTro: user.vaiTro,
   provider: user.provider,
+  isEmailVerified: user.isEmailVerified,
   createdAt: user.createdAt,
 });
+
+const buildEmailVerificationUrl = (token) => {
+  const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+  return `${frontendUrl}/verify-email/${token}`;
+};
+
+const sendVerificationForUser = async (user) => {
+  const verificationToken = user.getEmailVerificationToken();
+  await user.save({ validateBeforeSave: false });
+
+  await sendEmailVerificationEmail({
+    email: user.email,
+    hoTen: user.hoTen,
+    verificationUrl: buildEmailVerificationUrl(verificationToken),
+  });
+};
 
 // @desc    Đăng ký
 // @route   POST /api/auth/register
 exports.register = async (req, res) => {
   try {
     const { hoTen, email, matKhau } = req.body;
+    const normalizedEmail = String(email || '').trim().toLowerCase();
+
+    if (!hoTen || !normalizedEmail || !matKhau) {
+      return res.status(400).json({
+        success: false,
+        message: 'Vui lòng nhập đầy đủ họ tên, email và mật khẩu',
+      });
+    }
+
+    if (!emailRegex.test(normalizedEmail)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email không hợp lệ',
+      });
+    }
+
+    if (!isStrongPassword(matKhau)) {
+      return res.status(400).json({
+        success: false,
+        message: passwordSuggestion,
+        passwordSuggestion: true,
+      });
+    }
 
     // Kiểm tra email đã tồn tại chưa
-    const existingUser = await User.findOne({ email });
+    const existingUser = await User.findOne({ email: normalizedEmail });
     if (existingUser) {
       return res.status(400).json({
         success: false,
-        message: 'Email đã được sử dụng',
+        message: 'Tài khoản đã tồn tại',
+        suggestLogin: true,
       });
     }
 
     // Tạo user mới
     const user = await User.create({
-      hoTen,
-      email,
+      hoTen: String(hoTen).trim(),
+      email: normalizedEmail,
       matKhau,
+      isEmailVerified: false,
     });
 
-    // Trả về token
-    const token = user.getSignedJwtToken();
+    try {
+      await sendVerificationForUser(user);
+    } catch (mailError) {
+      await User.deleteOne({ _id: user._id });
+      console.error('Khong gui duoc email xac nhan tai khoan:', mailError.message);
+      if (!hasMailConfig) {
+        console.warn('Email config chua day du. Kiem tra EMAIL_USER va EMAIL_PASS trong .env');
+      }
+
+      return res.status(500).json({
+        success: false,
+        message: 'Không gửi được email xác nhận tài khoản',
+      });
+    }
 
     res.status(201).json({
       success: true,
-      token,
-      user: {
-        id: user._id,
-        hoTen: user.hoTen,
-        email: user.email,
-        vaiTro: user.vaiTro,
-      },
+      message: 'Đăng ký thành công. Vui lòng kiểm tra email để xác nhận tài khoản',
+      user: buildUserResponse(user),
     });
   } catch (error) {
     res.status(500).json({
@@ -65,9 +132,10 @@ exports.register = async (req, res) => {
 exports.login = async (req, res) => {
   try {
     const { email, matKhau } = req.body;
+    const normalizedEmail = String(email || '').trim().toLowerCase();
 
     // Validate
-    if (!email || !matKhau) {
+    if (!normalizedEmail || !matKhau) {
       return res.status(400).json({
         success: false,
         message: 'Vui lòng nhập email và mật khẩu',
@@ -75,7 +143,7 @@ exports.login = async (req, res) => {
     }
 
     // Tìm user (phải select matKhau vì đã set select: false)
-    const user = await User.findOne({ email }).select('+matKhau');
+    const user = await User.findOne({ email: normalizedEmail }).select('+matKhau');
 
     if (!user) {
       return res.status(401).json({
@@ -94,6 +162,14 @@ exports.login = async (req, res) => {
       });
     }
 
+    if (!user.isEmailVerified) {
+      return res.status(403).json({
+        success: false,
+        emailVerificationRequired: true,
+        message: 'Vui lòng xác nhận email trước khi đăng nhập',
+      });
+    }
+
     // Trả về token
     const token = user.getSignedJwtToken();
 
@@ -105,6 +181,7 @@ exports.login = async (req, res) => {
         hoTen: user.hoTen,
         email: user.email,
         vaiTro: user.vaiTro,
+        isEmailVerified: user.isEmailVerified,
       },
     });
   } catch (error) {
@@ -346,6 +423,7 @@ exports.confirmEmailChange = async (req, res) => {
     }
 
     user.email = user.pendingEmail;
+    user.isEmailVerified = true;
     user.pendingEmail = null;
     user.emailChangeCode = null;
     user.emailChangeCodeExpire = null;
@@ -365,13 +443,112 @@ exports.confirmEmailChange = async (req, res) => {
   }
 };
 
+// @desc    Xác nhận email tài khoản
+// @route   GET /api/auth/verify-email/:token
+exports.verifyEmail = async (req, res) => {
+  try {
+    const emailVerificationToken = crypto
+      .createHash('sha256')
+      .update(req.params.token)
+      .digest('hex');
+
+    const user = await User.findOne({
+      emailVerificationToken,
+      emailVerificationExpire: { $gt: Date.now() },
+    }).select('+emailVerificationToken +emailVerificationExpire');
+
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        message: 'Link xác nhận không hợp lệ hoặc đã hết hạn',
+      });
+    }
+
+    user.isEmailVerified = true;
+    user.emailVerificationToken = null;
+    user.emailVerificationExpire = null;
+    await user.save({ validateBeforeSave: false });
+
+    res.status(200).json({
+      success: true,
+      message: 'Xác nhận email thành công. Bạn có thể đăng nhập',
+      user: buildUserResponse(user),
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Lỗi server',
+      error: error.message,
+    });
+  }
+};
+
+// @desc    Gửi lại email xác nhận tài khoản
+// @route   POST /api/auth/resend-verification-email
+exports.resendVerificationEmail = async (req, res) => {
+  try {
+    const normalizedEmail = String(req.body.email || '').trim().toLowerCase();
+
+    if (!normalizedEmail || !emailRegex.test(normalizedEmail)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email không hợp lệ',
+      });
+    }
+
+    const user = await User.findOne({ email: normalizedEmail }).select(
+      '+emailVerificationToken +emailVerificationExpire'
+    );
+
+    if (!user) {
+      return res.status(200).json({
+        success: true,
+        message: 'Nếu email tồn tại và chưa xác nhận, chúng tôi đã gửi lại link xác nhận',
+      });
+    }
+
+    if (user.isEmailVerified) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email này đã được xác nhận',
+      });
+    }
+
+    try {
+      await sendVerificationForUser(user);
+
+      return res.status(200).json({
+        success: true,
+        message: 'Đã gửi lại email xác nhận tài khoản',
+      });
+    } catch (mailError) {
+      console.error('Khong gui duoc email xac nhan tai khoan:', mailError.message);
+      if (!hasMailConfig) {
+        console.warn('Email config chua day du. Kiem tra EMAIL_USER va EMAIL_PASS trong .env');
+      }
+
+      return res.status(500).json({
+        success: false,
+        message: 'Không gửi được email xác nhận tài khoản',
+      });
+    }
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Lỗi server',
+      error: error.message,
+    });
+  }
+};
+
 // @desc    Đăng nhập bằng mạng xã hội (Google)
 // @route   POST /api/auth/social-login
 exports.socialLogin = async (req, res) => {
   try {
     const { email, hoTen, avatar, provider } = req.body;
+    const normalizedEmail = String(email || '').trim().toLowerCase();
 
-    if (!email || typeof email !== 'string' || !emailRegex.test(email)) {
+    if (!normalizedEmail || !emailRegex.test(normalizedEmail)) {
       return res.status(400).json({
         success: false,
         message: 'Email không hợp lệ từ tài khoản mạng xã hội',
@@ -385,16 +562,22 @@ exports.socialLogin = async (req, res) => {
       });
     }
 
-    let user = await User.findOne({ email });
+    let user = await User.findOne({ email: normalizedEmail });
 
     if (!user) {
       user = await User.create({
-        hoTen: hoTen || email.split('@')[0],
-        email,
+        hoTen: hoTen || normalizedEmail.split('@')[0],
+        email: normalizedEmail,
         matKhau: crypto.randomBytes(32).toString('base64'),
         avatar: avatar || '',
         provider,
+        isEmailVerified: true,
       });
+    } else if (!user.isEmailVerified) {
+      user.isEmailVerified = true;
+      user.emailVerificationToken = null;
+      user.emailVerificationExpire = null;
+      await user.save({ validateBeforeSave: false });
     }
 
     if (user.trangThai === 'Bị khóa') {
@@ -415,6 +598,7 @@ exports.socialLogin = async (req, res) => {
         email: user.email,
         vaiTro: user.vaiTro,
         avatar: user.avatar,
+        isEmailVerified: user.isEmailVerified,
       },
     });
   } catch (error) {
@@ -431,15 +615,16 @@ exports.socialLogin = async (req, res) => {
 exports.forgotPassword = async (req, res) => {
   try {
     const { email } = req.body;
+    const normalizedEmail = String(email || '').trim().toLowerCase();
 
-    if (!email) {
+    if (!normalizedEmail) {
       return res.status(400).json({
         success: false,
         message: 'Vui lòng nhập email',
       });
     }
 
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email: normalizedEmail });
 
     if (!user) {
       return res.status(200).json({

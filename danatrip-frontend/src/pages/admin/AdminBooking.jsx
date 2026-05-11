@@ -54,6 +54,8 @@ const AdminBookings = () => {
       case 'Chờ xác nhận': return 'pending';
       case 'Đã xác nhận': return 'confirmed';
       case 'Đã thanh toán': return 'paid';
+      case 'Đang hoàn tiền': return 'pending';
+      case 'Đã hoàn tiền': return 'cancelled';
       case 'Đã hủy': return 'cancelled';
       default: return '';
     }
@@ -70,6 +72,8 @@ const AdminBookings = () => {
           <option value="Chờ xác nhận">Chờ xác nhận</option>
           <option value="Đã xác nhận">Đã xác nhận</option>
           <option value="Đã thanh toán">Đã thanh toán</option>
+          <option value="Đang hoàn tiền">Đang hoàn tiền</option>
+          <option value="Đã hoàn tiền">Đã hoàn tiền</option>
           <option value="Đã hủy">Đã hủy</option>
         </select>
       </div>
@@ -90,6 +94,7 @@ const AdminBookings = () => {
         <thead>
           <tr>
             <th>#</th>
+            <th>Mã hóa đơn</th>
             <th>Khách hàng</th>
             <th>SĐT</th>
             <th>Tour</th>
@@ -104,6 +109,7 @@ const AdminBookings = () => {
           {filteredBookings.map((b, i) => (
             <tr key={b._id}>
               <td>{i + 1}</td>
+              <td><code>{b._id}</code></td>
               <td><strong>{b.hoTen}</strong></td>
               <td>{b.sdt}</td>
               <td>{b.tour?.tenTour || '—'}</td>
@@ -125,8 +131,23 @@ const AdminBookings = () => {
                   </div>
                 )}
                 {b.trangThai === 'Đã xác nhận' && (
-                  <button className="btn-confirm" onClick={() => handleUpdateStatus(b._id, 'Đã thanh toán')}>
-                    💰 Đã TT
+                  <div className="action-btns">
+                    <button className="btn-confirm" onClick={() => handleUpdateStatus(b._id, 'Đã thanh toán')}>
+                      💰 Đã TT
+                    </button>
+                    <button className="btn-cancel-sm" onClick={() => handleUpdateStatus(b._id, 'Đã hủy')}>
+                      ❌ Hủy
+                    </button>
+                  </div>
+                )}
+                {b.trangThai === 'Đã thanh toán' && (
+                  <button className="btn-cancel-sm" onClick={() => handleUpdateStatus(b._id, 'Đã hủy')}>
+                    ↩️ Hủy & hoàn tiền
+                  </button>
+                )}
+                {b.trangThai === 'Đang hoàn tiền' && (
+                  <button className="btn-confirm" onClick={() => handleUpdateStatus(b._id, 'Đã hoàn tiền')}>
+                    ✅ Đã hoàn tiền
                   </button>
                 )}
               </td>

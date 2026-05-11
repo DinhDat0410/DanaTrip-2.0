@@ -12,6 +12,8 @@ const Register = () => {
   const [loading, setLoading] = useState(false);
   const { register } = useAuth();
   const navigate = useNavigate();
+  const passwordHint =
+    'Gợi ý mật khẩu an toàn: tối thiểu 8 ký tự, có chữ hoa, chữ thường, số và ký tự đặc biệt.';
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -24,10 +26,15 @@ const Register = () => {
 
     try {
       await register(hoTen, email, matKhau);
-      toast.success('Đăng ký thành công!');
-      navigate('/');
+      toast.success('Đăng ký thành công');
+      toast.info('Vui lòng kiểm tra email để xác nhận tài khoản');
+      navigate('/login', { state: { email } });
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Đăng ký thất bại');
+      const apiMessage = error.response?.data?.message;
+      toast.error(apiMessage || 'Đăng ký thất bại');
+      if (error.response?.data?.suggestLogin) {
+        toast.info('Bạn có thể chuyển sang trang đăng nhập để tiếp tục.');
+      }
     } finally {
       setLoading(false);
     }
@@ -67,10 +74,11 @@ const Register = () => {
               type="password"
               value={matKhau}
               onChange={(e) => setMatKhau(e.target.value)}
-              placeholder="Nhập mật khẩu (tối thiểu 6 ký tự)"
-              minLength={6}
+              placeholder="Nhập mật khẩu"
+              minLength={8}
               required
             />
+            <small className="auth-note">{passwordHint}</small>
           </div>
 
           <div className="form-group">

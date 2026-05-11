@@ -47,6 +47,20 @@ const UserSchema = new mongoose.Schema(
       enum: ['local', 'google'],
       default: 'local',
     },
+    isEmailVerified: {
+      type: Boolean,
+      default: true,
+    },
+    emailVerificationToken: {
+      type: String,
+      default: null,
+      select: false,
+    },
+    emailVerificationExpire: {
+      type: Date,
+      default: null,
+      select: false,
+    },
     hienThi: {
       type: Boolean,
       default: true,
@@ -114,6 +128,19 @@ UserSchema.methods.getResetPasswordToken = function () {
   this.resetPasswordExpire = Date.now() + 10 * 60 * 1000;
 
   return resetToken;
+};
+
+UserSchema.methods.getEmailVerificationToken = function () {
+  const verificationToken = crypto.randomBytes(32).toString('hex');
+
+  this.emailVerificationToken = crypto
+    .createHash('sha256')
+    .update(verificationToken)
+    .digest('hex');
+
+  this.emailVerificationExpire = Date.now() + 24 * 60 * 60 * 1000;
+
+  return verificationToken;
 };
 
 module.exports = mongoose.model('User', UserSchema);

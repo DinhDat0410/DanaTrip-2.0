@@ -26,6 +26,7 @@ import VNPayPaymentReturn from './pages/public/VNPayPaymentReturn';
 import Contact from './pages/public/Contact';
 import Login from './pages/public/Login';
 import Register from './pages/public/Register';
+import VerifyEmail from './pages/public/VerifyEmail';
 import ForgotPassword from './pages/public/ForgotPassword';
 import ResetPassword from './pages/public/ResetPassword';
 import Profile from './pages/public/Profile';
@@ -67,6 +68,7 @@ function App() {
             <Route path="reviews" element={<Reviews />} />
             <Route path="login" element={<Login />} />
             <Route path="register" element={<Register />} />
+            <Route path="verify-email/:token" element={<VerifyEmail />} />
             <Route path="forgot-password" element={<ForgotPassword />} />
             <Route path="reset-password/:token" element={<ResetPassword />} />
             <Route path="booking/:tourId" element={<ProtectedRoute><Booking /></ProtectedRoute>} />
