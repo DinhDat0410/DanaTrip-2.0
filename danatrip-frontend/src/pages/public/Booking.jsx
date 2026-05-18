@@ -250,7 +250,7 @@ const Booking = () => {
                 {[
                   { value: 'Cash', label: '💵 Tiền mặt' },
                   { value: 'Momo', label: '🟣 Momo' },
-                  //{ value: 'VNPay', label: '🔴 VNPay' },
+                  { value: 'VNPay', label: '🔴 VNPay' },
                   //{ value: 'BankTransfer', label: '🏦 Chuyển khoản' },
                 ].map((method) => (
                   <label key={method.value} className="payment-option">
