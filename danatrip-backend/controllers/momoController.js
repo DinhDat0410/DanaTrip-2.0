@@ -222,7 +222,18 @@ exports.createMomoPayment = async (req, res) => {
       resultCode: data?.resultCode,
     });
   } catch (error) {
-    res.status(500).json({ message: 'Lỗi create momo', error: error.message });
+    const momoStatus = error.response?.status;
+    const momoData = error.response?.data;
+
+    if (momoData) {
+      return res.status(momoStatus || 400).json({
+        message: momoData.message || 'Tạo thanh toán MoMo thất bại',
+        resultCode: momoData.resultCode,
+        error: error.message,
+      });
+    }
+
+    return res.status(500).json({ message: 'Lỗi create momo', error: error.message });
   }
 };
 

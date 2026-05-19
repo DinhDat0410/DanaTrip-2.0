@@ -115,6 +115,9 @@ const Booking = () => {
         } catch (payErr) {
           const d = payErr.response?.data;
           let msg = d?.message || 'Không tạo được thanh toán MoMo';
+          if (d?.resultCode !== undefined && d?.resultCode !== null) {
+            msg += ` (resultCode: ${d.resultCode})`;
+          }
           if (Array.isArray(d?.missingEnvVars) && d.missingEnvVars.length) {
             msg += ` (thiếu: ${d.missingEnvVars.join(', ')})`;
           }
